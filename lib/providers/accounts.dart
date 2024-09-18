@@ -25,19 +25,6 @@ Future<void> initAccounts() async {
   _accountCSV = await file.readAsString();
 }
 
-Future<void> setAccounts(String csv) async {
-  _accountCSV = csv;
-  Directory directory = await getApplicationSupportDirectory();
-  File file = File('${directory.path}/accounts.csv');
-  await file.writeAsString(csv);
-}
-
-Future<void> clearAccounts() async {
-  _accountCSV = "";
-  Directory directory = await getApplicationSupportDirectory();
-  File file = File('${directory.path}/accounts.csv');
-  await file.writeAsString("");
-}
 
 @Freezed(makeCollectionsUnmodifiable: false)
 class Account with _$Account {
@@ -138,6 +125,22 @@ class Accounts extends _$Accounts {
       lookup[account.fullName] = account;
     }
     return hierarchicalAccounts;
+  }
+
+
+  Future<void> setAccounts(String csv) async {
+    _accountCSV = csv;
+    Directory directory = await getApplicationSupportDirectory();
+    File file = File('${directory.path}/accounts.csv');
+    await file.writeAsString(csv);
+    state = _getCachedAccounts();
+  }
+  Future<void> clearAccounts() async {
+    _accountCSV = "";
+    Directory directory = await getApplicationSupportDirectory();
+    File file = File('${directory.path}/accounts.csv');
+    await file.writeAsString("");
+    state = [];
   }
 }
 
