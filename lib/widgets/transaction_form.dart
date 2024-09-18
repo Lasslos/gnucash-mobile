@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gnucash_mobile/constants.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:gnucash_mobile/providers/transactions.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
-import 'package:gnucash_mobile/constants.dart';
+class TransactionForm extends ConsumerStatefulWidget {
+  final Account? toAccount;
 
-class TransactionForm extends StatefulWidget {
-  final Account toAccount;
+  const TransactionForm({super.key, this.toAccount});
 
-  const TransactionForm({Key key, this.toAccount}) : super(key: key);
   @override
   _TransactionFormState createState() => _TransactionFormState();
 }
 
-class _TransactionFormState extends State<TransactionForm> {
+class _TransactionFormState extends ConsumerState<TransactionForm> {
   @override
   void initState() {
     super.initState();
@@ -24,8 +24,9 @@ class _TransactionFormState extends State<TransactionForm> {
   final _key = GlobalKey<FormState>();
   final _visibleAmountInputController = TextEditingController();
   final _dateInputController = TextEditingController();
+
   // Credit account, debit account
-  final _transactions = [const Transaction(), const Transaction()];
+  final _transactions = [Transaction.empty(), Transaction.empty()];
 
   @override
   void dispose() {
@@ -38,227 +39,246 @@ class _TransactionFormState extends State<TransactionForm> {
   Widget build(BuildContext context) {
     final _node = FocusScope.of(context);
     final _simpleCurrencyNumberFormat = NumberFormat.simpleCurrency(
-        locale: Localizations.localeOf(context).toString(),);
+      locale: Localizations.localeOf(context).toString(),
+    );
+    List<Account> validTransactionAccounts =
+        ref.watch(validTransactionAccountsProvider);
+    Account? favoriteDebitAccount = ref.watch(favoriteDebitAccountProvider);
+    Account? favoriteCreditAccount = ref.watch(favoriteCreditAccountProvider);
 
-    return Consumer<AccountsModel>(builder: (context, accounts, child) {
-      return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Constants.darkBG,
-          title: const Text("New transaction"),
-          leading: Builder(builder: (context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: darkBG,
+        title: const Text("New transaction"),
+        leading: Builder(
+          builder: (context) {
             return IconButton(
               icon: const Icon(Icons.clear),
               onPressed: () => Navigator.pop(context),
               tooltip: MaterialLocalizations.of(context).backButtonTooltip,
             );
-          },),
-        ),
-        body: Form(
-          autovalidateMode: AutovalidateMode.disabled,
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            children: <Widget>[
-              Focus(
-                child: TextFormField(
-                  autofocus: true,
-                  controller: _visibleAmountInputController,
-                  decoration: const InputDecoration(
-                    hintText: 'Amount',
-                  ),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  onEditingComplete: () => _node.nextFocus(),
-                  onSaved: (value) {
-                    final _amount = _simpleCurrencyNumberFormat.parse(value);
-                    _transactions[0].amount = _amount;
-                    _transactions[0].amountWithSymbol = value;
-                    _transactions[1].amount = -_amount;
-                    _transactions[1].amountWithSymbol = "-" + value;
-                  },
-                  textInputAction: TextInputAction.next,
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return 'Please enter a valid amount';
-                    }
-
-                    return null;
-                  },
-                ),
-                onFocusChange: (hasFocus) {
-                  if (!hasFocus) {
-                    final _rawValue = _visibleAmountInputController.value.text;
-                    final _simpleCurrencyValue = _simpleCurrencyNumberFormat
-                        .format(_simpleCurrencyNumberFormat.parse(_rawValue));
-                    _visibleAmountInputController.value =
-                        _visibleAmountInputController.value.copyWith(
-                      text: _simpleCurrencyValue,
-                    );
-                  }
-                },
-              ),
-              TextFormField(
-                decoration: const InputDecoration(
-                  hintText: 'Description',
-                ),
-                onEditingComplete: () => _node.nextFocus(),
-                onSaved: (value) {
-                  _transactions[0].description = value;
-                  _transactions[1].description = value;
-                },
-                textCapitalization: TextCapitalization.sentences,
-                textInputAction: TextInputAction.next,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please enter a valid description';
-                  }
-                  return null;
-                },
-              ),
-              FutureBuilder<Account>(
-                  future: Provider.of<AccountsModel>(context, listen: false)
-                      .favoriteCreditAccount,
-                  builder: (context, AsyncSnapshot<Account> snapshot) {
-                    return DropdownButtonFormField<Account>(
-                        decoration: const InputDecoration(
-                          hintText: 'Credit Account',
-                        ),
-                        isExpanded: true,
-                        // TODO: Put recently used first
-                        items: accounts.validTransactionAccounts.map((account) {
-                          return DropdownMenuItem(
-                            value: account,
-                            child: Text(
-                              account.fullName,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {},
-                        onSaved: (value) {
-                          _transactions[0].fullAccountName = value.fullName;
-                          _transactions[0].accountName = value.name;
-                        },
-                        validator: (value) {
-                          if (value == null) {
-                            return 'Please enter a valid account to credit.';
-                          }
-                          return null;
-                        },
-                        value: snapshot.hasData
-                            ? accounts.validTransactionAccounts.firstWhere(
-                                (account) =>
-                                    account.fullName == snapshot.data.fullName,)
-                            : widget.toAccount != null
-                                ? accounts.validTransactionAccounts.firstWhere(
-                                    (account) =>
-                                        account.fullName ==
-                                        widget.toAccount.fullName,)
-                                : null,);
-                  },),
-              FutureBuilder<Account>(
-                  future: Provider.of<AccountsModel>(context, listen: false)
-                      .favoriteDebitAccount,
-                  builder: (context, AsyncSnapshot<Account> snapshot) {
-                    return DropdownButtonFormField<Account>(
-                      decoration: const InputDecoration(
-                        hintText: 'Debit Account',
-                      ),
-                      isExpanded: true,
-                      // TODO: put recently used first
-                      items: accounts.validTransactionAccounts.map((account) {
-                        return DropdownMenuItem(
-                          value: account,
-                          child: Text(account.fullName),
-                        );
-                      }).toList(),
-                      onChanged: (value) {},
-                      onSaved: (value) {
-                        _transactions[1].fullAccountName = value.fullName;
-                        _transactions[1].accountName = value.name;
-                      },
-                      validator: (value) {
-                        if (value == null) {
-                          return 'Please enter a valid account to debit';
-                        }
-                        return null;
-                      },
-                      value: snapshot.hasData
-                          ? accounts.validTransactionAccounts.firstWhere(
-                              (account) =>
-                                  account.fullName == snapshot.data.fullName,)
-                          : null,
-                    );
-                  },),
-              TextFormField(
-                decoration: const InputDecoration(
-                  hintText: 'Date',
-                ),
-                controller: _dateInputController,
-                onSaved: (value) {
-                  _transactions[0].date = DateFormat('yyyy-MM-dd')
-                      .format(DateFormat.yMd().parse(value));
-                },
-                onTap: () async {
-                  final _now = DateTime.now();
-                  final _date = await showDatePicker(
-                    context: context,
-                    initialDate: _now,
-                    firstDate: DateTime(_now.year - 10),
-                    lastDate: DateTime(_now.year + 10),
-                  );
-
-                  _dateInputController.text = DateFormat.yMd().format(_date);
-                },
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please enter a valid date';
-                  }
-                  try {
-                    DateFormat.yMd().parse(value);
-                  } catch (FormatException) {
-                    return 'Please enter a valid date';
-                  }
-
-                  return null;
-                },
-              ),
-              TextFormField(
-                decoration: const InputDecoration(
-                  hintText: 'Notes',
-                ),
-                textCapitalization: TextCapitalization.sentences,
-                onSaved: (value) {
-                  _transactions[0].notes = value;
-                },
-              ),
-            ],
-          ),
-          key: _key,
-        ),
-        floatingActionButton:
-            // Builder(builder: (context) {
-            FloatingActionButton(
-          backgroundColor: Constants.darkBG,
-          child: const Icon(Icons.save_sharp),
-          onPressed: () {
-            // Validate will return true if the form is valid, or false if
-            // the form is invalid.
-            if (_key.currentState.validate()) {
-              // Process data.
-              _key.currentState.save();
-
-              final id = UniqueKey().toString();
-              _transactions[0].id = id;
-              _transactions[1].id = id;
-
-              Provider.of<TransactionsModel>(context, listen: false)
-                  .addAll(_transactions);
-              Navigator.pop(context, true);
-            } else {
-              print("invalid form");
-            }
           },
         ),
-      );
-    },);
+      ),
+      body: Form(
+        autovalidateMode: AutovalidateMode.disabled,
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          children: <Widget>[
+            Focus(
+              child: TextFormField(
+                autofocus: true,
+                controller: _visibleAmountInputController,
+                decoration: const InputDecoration(
+                  hintText: 'Amount',
+                ),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                onEditingComplete: () => _node.nextFocus(),
+                onSaved: (value) {
+                  if (value == null) {
+                    return;
+                  }
+                  final _amount = _simpleCurrencyNumberFormat.parse(value);
+                  _transactions[0] = _transactions[0].copyWith(
+                    amount: _amount.toDouble(),
+                    amountWithSymbol: value,
+                  );
+                  _transactions[1] = _transactions[1].copyWith(
+                    amount: -_amount.toDouble(),
+                    amountWithSymbol: "-" + value,
+                  );
+                },
+                textInputAction: TextInputAction.next,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a valid amount';
+                  }
+
+                  return null;
+                },
+              ),
+              onFocusChange: (hasFocus) {
+                if (!hasFocus) {
+                  final _rawValue = _visibleAmountInputController.value.text;
+                  final _simpleCurrencyValue = _simpleCurrencyNumberFormat
+                      .format(_simpleCurrencyNumberFormat.parse(_rawValue));
+                  _visibleAmountInputController.value =
+                      _visibleAmountInputController.value.copyWith(
+                    text: _simpleCurrencyValue,
+                  );
+                }
+              },
+            ),
+            TextFormField(
+              decoration: const InputDecoration(
+                hintText: 'Description',
+              ),
+              onEditingComplete: () => _node.nextFocus(),
+              onSaved: (value) {
+                if (value == null) {
+                  return;
+                }
+                _transactions[0] =
+                    _transactions[0].copyWith(description: value);
+                _transactions[1] =
+                    _transactions[1].copyWith(description: value);
+              },
+              textCapitalization: TextCapitalization.sentences,
+              textInputAction: TextInputAction.next,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a valid description';
+                }
+                return null;
+              },
+            ),
+            DropdownButtonFormField<Account>(
+              decoration: const InputDecoration(
+                hintText: 'Credit Account',
+              ),
+              isExpanded: true,
+              // TODO: Put recently used first
+              items: validTransactionAccounts.map((account) {
+                return DropdownMenuItem(
+                  value: account,
+                  child: Text(
+                    account.fullName,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                );
+              }).toList(),
+              onChanged: (value) {},
+              onSaved: (value) {
+                if (value == null) {
+                  return;
+                }
+                _transactions[0] = _transactions[0].copyWith(
+                  fullAccountName: value.fullName,
+                  accountName: value.name,
+                );
+              },
+              validator: (value) {
+                if (value == null) {
+                  return 'Please enter a valid account to credit.';
+                }
+                return null;
+              },
+              value: validTransactionAccounts.firstWhere(
+                (account) =>
+                    account.fullName == favoriteCreditAccount?.fullName,
+              ),
+            ),
+            DropdownButtonFormField<Account>(
+              decoration: const InputDecoration(
+                hintText: 'Debit Account',
+              ),
+              isExpanded: true,
+              // TODO: put recently used first
+              items: validTransactionAccounts.map((account) {
+                return DropdownMenuItem(
+                  value: account,
+                  child: Text(account.fullName),
+                );
+              }).toList(),
+              onChanged: (value) {},
+              onSaved: (value) {
+                if (value == null) {
+                  return;
+                }
+                _transactions[1] = _transactions[1].copyWith(
+                  fullAccountName: value.fullName,
+                  accountName: value.name,
+                );
+              },
+              validator: (value) {
+                if (value == null) {
+                  return 'Please enter a valid account to debit';
+                }
+                return null;
+              },
+              value: validTransactionAccounts.firstWhere(
+                (account) => account.fullName == favoriteDebitAccount?.fullName,
+              ),
+            ),
+            TextFormField(
+              decoration: const InputDecoration(
+                hintText: 'Date',
+              ),
+              controller: _dateInputController,
+              onSaved: (value) {
+                if (value == null) {
+                  return;
+                }
+                _transactions[0] = _transactions[0].copyWith(
+                  date: DateFormat('yyyy-MM-dd')
+                      .format(DateFormat.yMd().parse(value)),
+                );
+              },
+              onTap: () async {
+                final _now = DateTime.now();
+                final _date = await showDatePicker(
+                  context: context,
+                  initialDate: _now,
+                  firstDate: DateTime(_now.year - 10),
+                  lastDate: DateTime(_now.year + 10),
+                );
+                if (_date == null) {
+                  return;
+                }
+                _dateInputController.text = DateFormat.yMd().format(_date);
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a valid date';
+                }
+                try {
+                  DateFormat.yMd().parse(value);
+                } on FormatException {
+                  return 'Please enter a valid date';
+                }
+
+                return null;
+              },
+            ),
+            TextFormField(
+              decoration: const InputDecoration(
+                hintText: 'Notes',
+              ),
+              textCapitalization: TextCapitalization.sentences,
+              onSaved: (value) {
+                if (value == null) {
+                  return;
+                }
+                _transactions[0] = _transactions[0].copyWith(notes: value);
+              },
+            ),
+          ],
+        ),
+        key: _key,
+      ),
+      floatingActionButton:
+          // Builder(builder: (context) {
+          FloatingActionButton(
+        backgroundColor: darkBG,
+        child: const Icon(Icons.save_sharp),
+        onPressed: () {
+          // Validate will return true if the form is valid, or false if
+          // the form is invalid.
+          if (_key.currentState!.validate()) {
+            // Process data.
+            _key.currentState!.save();
+
+            final id = UniqueKey().toString();
+            _transactions[0] = _transactions[0].copyWith(id: id);
+            _transactions[1] = _transactions[1].copyWith(id: id);
+            ref.read(transactionsProvider.notifier).addAll(_transactions);
+            Navigator.pop(context, true);
+          } else {
+            print("invalid form");
+          }
+        },
+      ),
+    );
   }
 }

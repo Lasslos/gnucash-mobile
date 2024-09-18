@@ -11,8 +11,7 @@ part 'transactions.freezed.dart';
 part 'transactions.g.dart';
 
 late String _transactionCSV;
-/// TODO: Initialize in main.dart
-Future<void> initAccounts() async {
+Future<void> initTransactions() async {
   /// TODO: Using applicationSupportDirectory is discouraged for userData, migrate to SharedPreferences
   Directory directory = await getApplicationSupportDirectory();
   File file = File('${directory.path}/transactions.csv');
@@ -45,11 +44,32 @@ class Transaction with _$Transaction {
   }) = _Transaction;
   const Transaction._();
 
+  static Transaction empty() {
+    return const Transaction(
+      date: "",
+      id: "",
+      number: null,
+      description: "",
+      notes: "",
+      commodityCurrency: "",
+      voidReason: "",
+      action: "",
+      memo: "",
+      fullAccountName: "",
+      accountName: "",
+      amountWithSymbol: "",
+      amount: null,
+      reconcile: "",
+      reconcileDate: "",
+      ratePrice: null,
+    );
+  }
+
   factory Transaction.fromCSVLine(List<String> items) {
     items = items.map((item) => item.trim()).toList();
 
     return Transaction(
-      date: items[0] ?? "",
+      date: items[0],
       id: items[1],
       number: int.tryParse(items[2]) ?? null,
       description: items[3],
@@ -88,7 +108,8 @@ class Transaction with _$Transaction {
     ];
   }
 
-  factory Transaction.fromJson(Map<String, dynamic> json) => _$TransactionFromJson(json);
+  factory Transaction.fromJson(Map<String, dynamic> json) =>
+      _$TransactionFromJson(json);
 }
 
 @riverpod
@@ -115,13 +136,16 @@ class Transactions extends _$Transactions {
     List<List<String>> parsedCSV = converter.convert(_transactionCSV.trim());
 
     // Convert List<List<String>> to List<Transaction>
-    return List.unmodifiable(parsedCSV.map((line) => Transaction.fromCSVLine(line)).toList());
+    return List.unmodifiable(
+      parsedCSV.map((line) => Transaction.fromCSVLine(line)).toList(),
+    );
   }
+
   void _setCachedTransactions() async {
     Directory directory = await getApplicationSupportDirectory();
     File file = File('${directory.path}/transactions.csv');
     String csvString = const ListToCsvConverter(eol: "\n")
-      .convert(state.map((transaction) => transaction.toCSVLine()).toList());
+        .convert(state.map((transaction) => transaction.toCSVLine()).toList());
     await file.writeAsString(csvString);
   }
 
@@ -129,30 +153,38 @@ class Transactions extends _$Transactions {
     state = List.unmodifiable([...state, ...transactions]);
     _setCachedTransactions();
   }
+
   void removeAll() {
     state = List.unmodifiable([]);
     _setCachedTransactions();
   }
+
   void remove(Transaction transaction) {
     state = List.unmodifiable([...state]..remove(transaction));
     _setCachedTransactions();
   }
+
   String getCSV() {
     String content = const ListToCsvConverter(eol: "\n")
-      .convert(state.map((transaction) => transaction.toCSVLine()).toList());
+        .convert(state.map((transaction) => transaction.toCSVLine()).toList());
     return "Date,Transaction ID,Number,Description,Notes,Commodity/Currency,Void Reason,Action,Memo,Full Account Name,Account Name,Amount With Sym.,Amount Num,Reconcile,Reconcile Date,Rate/Price\n$content";
   }
 }
 
 @riverpod
-Map<String, List<Transaction>> transactionsByAccountFullName(TransactionsByAccountFullNameRef ref) {
+Map<String, List<Transaction>> transactionsByAccountFullName(
+  TransactionsByAccountFullNameRef ref,
+) {
   final transactions = ref.watch(transactionsProvider);
   final Map<String, List<Transaction>> transactionsByAccountFullName = {};
 
   for (var transaction in transactions) {
-    transactionsByAccountFullName.putIfAbsent(transaction.fullAccountName, () => []);
-    transactionsByAccountFullName[transaction.fullAccountName]!.add(transaction);
+    transactionsByAccountFullName.putIfAbsent(
+      transaction.fullAccountName,
+      () => [],
+    );
+    transactionsByAccountFullName[transaction.fullAccountName]!
+        .add(transaction);
   }
   return transactionsByAccountFullName;
 }
-

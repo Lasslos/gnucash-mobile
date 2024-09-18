@@ -2,40 +2,44 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gnucash_mobile/constants.dart';
-import 'package:provider/provider.dart';
+import 'package:gnucash_mobile/providers/accounts.dart';
 
-class Intro extends StatelessWidget {
+class Intro extends ConsumerWidget {
   const Intro({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Center(
       child: TextButton(
         style: ButtonStyle(
-          backgroundColor:
-              WidgetStateProperty.all<Color>(Constants.darkAccent),
+          backgroundColor: WidgetStateProperty.all<Color>(darkAccent),
         ),
         onPressed: () async {
-          FilePickerResult result = await FilePicker.platform.pickFiles();
-
+          FilePickerResult? result = await FilePicker.platform.pickFiles();
+          if (result == null) {
+            return;
+          }
           try {
-            final _file = File(result.files.single.path);
+            final _file = File(result.files.single.path!);
             String contents = await _file.readAsString();
-            Provider.of<AccountsModel>(context, listen: false)
-                .addAll(contents);
+            ref.read(accountsProvider.notifier).setAccounts(contents);
           } catch (e) {
             print(e);
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text(
-                  "Oops, something went wrong while importing. Please correct any errors in your Accounts CSV and try again.",),
-            ),);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  "Oops, something went wrong while importing. Please correct any errors in your Accounts CSV and try again.",
+                ),
+              ),
+            );
           }
-                },
+        },
         child: Text(
           "Import",
           style: TextStyle(
-            color: Constants.lightPrimary,
+            color: lightPrimary,
           ),
         ),
       ),

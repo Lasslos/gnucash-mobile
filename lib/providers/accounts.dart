@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
+
 import 'package:csv/csv.dart';
 import 'package:csv/csv_settings_autodetection.dart';
 import 'package:flutter/foundation.dart';
@@ -13,7 +14,7 @@ part 'accounts.freezed.dart';
 part 'accounts.g.dart';
 
 late String _accountCSV;
-/// TODO: Initialize in main.dart
+
 Future<void> initAccounts() async {
   /// TODO: Using applicationSupportDirectory is discouraged for userData, migrate to SharedPreferences
   Directory directory = await getApplicationSupportDirectory();
@@ -24,7 +25,6 @@ Future<void> initAccounts() async {
   }
   _accountCSV = await file.readAsString();
 }
-
 
 @Freezed(makeCollectionsUnmodifiable: false)
 class Account with _$Account {
@@ -41,7 +41,6 @@ class Account with _$Account {
     required bool hidden,
     required bool tax,
     required bool placeholder,
-
     @Default(0) double balance,
     @Default([]) List<Account> children,
     String? parentFullName,
@@ -49,7 +48,8 @@ class Account with _$Account {
 
   const Account._();
 
-  factory Account.fromJson(Map<String, dynamic> json) => _$AccountFromJson(json);
+  factory Account.fromJson(Map<String, dynamic> json) =>
+      _$AccountFromJson(json);
 
   factory Account.fromCSVLine(List<String> line) {
     line = line.map((e) => e.trim()).toList();
@@ -107,7 +107,8 @@ class Accounts extends _$Accounts {
       ..removeAt(0); // Remove header row
 
     // Convert List<List<String>> to List<Account>
-    List<Account> accounts = parsedCSV.map((csvLine) => Account.fromCSVLine(csvLine)).toList();
+    List<Account> accounts =
+        parsedCSV.map((csvLine) => Account.fromCSVLine(csvLine)).toList();
 
     Map<String, Account> lookup = {};
     List<Account> hierarchicalAccounts = [];
@@ -134,6 +135,7 @@ class Accounts extends _$Accounts {
     await file.writeAsString(csv);
     state = _getCachedAccounts();
   }
+
   Future<void> clearAccounts() async {
     _accountCSV = "";
     Directory directory = await getApplicationSupportDirectory();
@@ -145,7 +147,10 @@ class Accounts extends _$Accounts {
 
 @riverpod
 List<Account> validTransactionAccounts(ValidTransactionAccountsRef ref) {
-  return ref.watch(accountsProvider).where((account) => !account.placeholder).toList();
+  return ref
+      .watch(accountsProvider)
+      .where((account) => !account.placeholder)
+      .toList();
 }
 
 @riverpod
@@ -159,11 +164,15 @@ class FavoriteDebitAccount extends _$FavoriteDebitAccount {
     return Account.fromJson(jsonDecode(json));
   }
 
-  void setFavoriteDebitAccount(Account account) {
-    sharedPreferences.setString('favoriteDebitAccount', jsonEncode(account.toJson()));
+  void set(Account account) {
+    sharedPreferences.setString(
+      'favoriteDebitAccount',
+      jsonEncode(account.toJson()),
+    );
     state = account;
   }
-  void clearFavoriteDebitAccount() {
+
+  void clear() {
     sharedPreferences.remove('favoriteDebitAccount');
     state = null;
   }
@@ -181,9 +190,13 @@ class FavoriteCreditAccount extends _$FavoriteCreditAccount {
   }
 
   void set(Account account) {
-    sharedPreferences.setString('favoriteCreditAccount', jsonEncode(account.toJson()));
+    sharedPreferences.setString(
+      'favoriteCreditAccount',
+      jsonEncode(account.toJson()),
+    );
     state = account;
   }
+
   void clear() {
     sharedPreferences.remove('favoriteCreditAccount');
     state = null;

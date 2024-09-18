@@ -1,45 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gnucash_mobile/constants.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
+import 'package:gnucash_mobile/providers/transactions.dart';
 import 'package:gnucash_mobile/widgets/list_of_accounts.dart';
 import 'package:gnucash_mobile/widgets/transaction_form.dart';
 import 'package:gnucash_mobile/widgets/transactions_view.dart';
 
-import 'package:gnucash_mobile/constants.dart';
-
-class AccountView extends StatelessWidget {
+class AccountView extends ConsumerWidget {
   final Account account;
 
   const AccountView({required this.account, super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    Map<String, List<Transaction>> transactionsByAccountFullName =
+        ref.watch(transactionsByAccountFullNameProvider);
     // Deliver simpler view if this account cannot hold transactions
     if (this.account.placeholder) {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: Constants.darkBG,
+          backgroundColor: darkBG,
           title: Text(this.account.fullName),
         ),
         body: ListOfAccounts(accounts: this.account.children),
-        floatingActionButton: Builder(builder: (context) {
-          return FloatingActionButton(
-            backgroundColor: Constants.darkBG,
-            child: const Icon(Icons.add),
-            onPressed: () async {
-              final _success = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const TransactionForm(),
-                ),
-              );
+        floatingActionButton: Builder(
+          builder: (context) {
+            return FloatingActionButton(
+              backgroundColor: darkBG,
+              child: const Icon(Icons.add),
+              onPressed: () async {
+                final _success = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TransactionForm(),
+                  ),
+                );
 
-              if (_success != null && _success) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Transaction created!")),);
-              }
-            },
-          );
-        },),
+                if (_success != null && _success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Transaction created!")),
+                  );
+                }
+              },
+            );
+          },
+        ),
       );
     }
 
@@ -60,33 +66,35 @@ class AccountView extends StatelessWidget {
           children: [
             ListOfAccounts(accounts: this.account.children),
             TransactionsView(
-                transactions: Provider.of<TransactionsModel>(context,
-                            listen: true,)
-                        .transactionsByAccountFullName[this.account.fullName] ??
-                    [],),
+              transactions:
+                  transactionsByAccountFullName[this.account.fullName] ?? [],
+            ),
           ],
         ),
-        floatingActionButton: Builder(builder: (context) {
-          return FloatingActionButton(
-            backgroundColor: Constants.darkBG,
-            child: const Icon(Icons.add),
-            onPressed: () async {
-              final _success = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TransactionForm(
-                    toAccount: this.account,
+        floatingActionButton: Builder(
+          builder: (context) {
+            return FloatingActionButton(
+              backgroundColor: darkBG,
+              child: const Icon(Icons.add),
+              onPressed: () async {
+                final _success = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TransactionForm(
+                      toAccount: this.account,
+                    ),
                   ),
-                ),
-              );
+                );
 
-              if (_success != null && _success) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Transaction created!")),);
-              }
-            },
-          );
-        },),
+                if (_success != null && _success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Transaction created!")),
+                  );
+                }
+              },
+            );
+          },
+        ),
       ),
     );
   }

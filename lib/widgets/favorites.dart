@@ -1,119 +1,112 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
-import 'package:provider/provider.dart';
 
 import 'package:gnucash_mobile/constants.dart';
 
-class Favorites extends StatelessWidget {
+class Favorites extends ConsumerWidget {
   const Favorites({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<AccountsModel>(builder: (context, accounts, child) {
-      return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Constants.darkBG,
-          title: const Text("Favorites"),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                FutureBuilder<Account>(
-                    future: Provider.of<AccountsModel>(context, listen: false)
-                        .favoriteDebitAccount,
-                    builder: (context, AsyncSnapshot<Account> snapshot) {
-                      return DropdownButton<Account>(
-                        hint: const Text("Favorite Debit Account"),
-                        isExpanded: true,
-                        // TODO: Put recently used first
-                        items: accounts.validTransactionAccounts.map((account) {
-                          return DropdownMenuItem(
-                            value: account,
-                            child: Text(
-                              account.fullName,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          accounts.setFavoriteDebitAccount(value);
-                        },
-                        value: snapshot.hasData
-                            ? accounts.validTransactionAccounts.firstWhere(
-                                (account) =>
-                                    account.fullName == snapshot.data.fullName,)
-                            : null,
-                      );
-                    },),
-                FutureBuilder<Account>(
-                    future: Provider.of<AccountsModel>(context, listen: false)
-                        .favoriteCreditAccount,
-                    builder: (context, AsyncSnapshot<Account> snapshot) {
-                      return DropdownButton<Account>(
-                        hint: const Text("Favorite Credit Account"),
-                        isExpanded: true,
-                        // TODO: Put recently used first
-                        items: accounts.validTransactionAccounts.map((account) {
-                          return DropdownMenuItem(
-                            value: account,
-                            child: Text(
-                              account.fullName,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          accounts.setFavoriteCreditAccount(value);
-                        },
-                        value: snapshot.hasData
-                            ? accounts.validTransactionAccounts.firstWhere(
-                                (account) =>
-                                    account.fullName == snapshot.data.fullName,)
-                            : null,
-                      );
-                    },),
-                const Divider(
-                  height: 50,
-                  color: Colors.transparent,
-                ),
-                TextButton(
-                  style: ButtonStyle(
-                    backgroundColor:
-                        WidgetStateProperty.all<Color>(Constants.darkAccent),
-                  ),
-                  onPressed: () {
-                    accounts.removeFavoriteDebitAccount();
-                  },
-                  child: Text(
-                    "Clear favorite debit account",
-                    style: TextStyle(
-                      color: Constants.lightPrimary,
+  Widget build(BuildContext context, WidgetRef ref) {
+    List<Account> validTransactionAccounts =
+        ref.watch(validTransactionAccountsProvider);
+    Account? favoriteDebitAccount = ref.watch(favoriteDebitAccountProvider);
+    Account? favoriteCreditAccount = ref.watch(favoriteCreditAccountProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: darkBG,
+        title: const Text("Favorites"),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              DropdownButton<Account>(
+                hint: const Text("Favorite Debit Account"),
+                isExpanded: true,
+                // TODO: Put recently used first
+                items: validTransactionAccounts.map((account) {
+                  return DropdownMenuItem(
+                    value: account,
+                    child: Text(
+                      account.fullName,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    ref.read(favoriteDebitAccountProvider.notifier).set(value);
+                  }
+                },
+                value: validTransactionAccounts.firstWhere(
+                  (account) =>
+                      account.fullName == favoriteDebitAccount?.fullName,
                 ),
-                TextButton(
-                  style: ButtonStyle(
-                    backgroundColor:
-                        WidgetStateProperty.all<Color>(Constants.darkAccent),
-                  ),
-                  onPressed: () {
-                    accounts.removeFavoriteCreditAccount();
-                  },
-                  child: Text(
-                    "Clear favorite credit account",
-                    style: TextStyle(
-                      color: Constants.lightPrimary,
+              ),
+              DropdownButton<Account>(
+                hint: const Text("Favorite Credit Account"),
+                isExpanded: true,
+                // TODO: Put recently used first
+                items: validTransactionAccounts.map((account) {
+                  return DropdownMenuItem(
+                    value: account,
+                    child: Text(
+                      account.fullName,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    ref.read(favoriteCreditAccountProvider.notifier).set(value);
+                  }
+                },
+                value: validTransactionAccounts.firstWhere(
+                  (account) =>
+                      account.fullName == favoriteCreditAccount?.fullName,
+                ),
+              ),
+              const Divider(
+                height: 50,
+                color: Colors.transparent,
+              ),
+              TextButton(
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all<Color>(darkAccent),
+                ),
+                onPressed: () {
+                  ref.read(favoriteDebitAccountProvider.notifier).clear();
+                },
+                child: Text(
+                  "Clear favorite debit account",
+                  style: TextStyle(
+                    color: lightPrimary,
                   ),
                 ),
-              ],
-            ),
+              ),
+              TextButton(
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all<Color>(darkAccent),
+                ),
+                onPressed: () {
+                  ref.read(favoriteCreditAccountProvider.notifier).clear();
+                },
+                child: Text(
+                  "Clear favorite credit account",
+                  style: TextStyle(
+                    color: lightPrimary,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-      );
-    },);
+      ),
+    );
   }
 }
