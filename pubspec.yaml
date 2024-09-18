@@ -1,9 +1,7 @@
 name: gnucash_mobile
-description: An application for keeping track of Gnucash transactions on the go.
+description: "An application for keeping track of Gnucash transactions on the go."
 
-# The following line prevents the package from being accidentally published to
-# pub.dev using `pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: 'none'
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -18,27 +16,23 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.8+3
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ^3.5.3
 
 dependencies:
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  csv: ^5.0.0
-  cupertino_icons: ^1.0.2
-  file_picker: ^4.1.6
-  intl: ^0.17.0
-  path_provider: ^2.0.5
-  provider: ^6.0.1
-  shared_preferences: ^2.0.8
+  csv: ^6.0.0
+  cupertino_icons: ^1.0.8
+  file_picker: ^8.1.2
+  intl: ^0.19.0
+  path_provider: ^2.1.4
+  provider: ^6.1.2
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
-  flutter_launcher_icons: ^0.9.2
+  flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
 
