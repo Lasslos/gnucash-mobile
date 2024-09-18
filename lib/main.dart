@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/number_symbols_data.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
@@ -11,20 +12,19 @@ import 'package:gnucash_mobile/widgets/favorites.dart';
 import 'package:gnucash_mobile/widgets/intro.dart';
 import 'package:gnucash_mobile/widgets/list_of_accounts.dart';
 import 'package:gnucash_mobile/widgets/transaction_form.dart';
-import 'package:provider/provider.dart';
-import 'constants.dart';
+import 'package:gnucash_mobile/constants.dart';
 
 void main() {
-  runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (context) => AccountsModel()),
-      ChangeNotifierProvider(create: (context) => TransactionsModel()),
-    ],
-    child: MyApp(),
-  ));
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -32,13 +32,13 @@ class MyApp extends StatelessWidget {
       title: Constants.appName,
       theme: Constants.lightTheme,
       darkTheme: Constants.darkTheme,
-      home: MyHomePage(title: 'Accounts'),
+      home: const MyHomePage(title: 'Accounts'),
       supportedLocales: numberFormatSymbols.keys
           .where((key) => key.toString().contains('_'))
           .map((key) => key.toString().split('_'))
           .map((split) => Locale(split[0], split[1]))
           .toList(),
-      localizationsDelegates: [
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key key, this.title}) : super(key: key);
 
   final String title;
 
@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 backgroundColor: Constants.darkBG,
                 title: Text(widget.title),
               ),
-              body: _hasImported ? ListOfAccounts(accounts: accounts) : Intro(),
+              body: _hasImported ? ListOfAccounts(accounts: accounts) : const Intro(),
               drawer: Drawer(
                   child: ListView(
                 padding: EdgeInsets.zero,
@@ -91,13 +91,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   ListTile(
-                      title: Text('Import Accounts'),
+                      title: const Text('Import Accounts'),
                       onTap: () async {
                         if (_hasImported) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                             content: Text(
-                                "Accounts already imported. Please remove them first."),
-                          ));
+                                "Accounts already imported. Please remove them first.",),
+                          ),);
                           Navigator.pop(context);
                           return;
                         }
@@ -105,61 +105,59 @@ class _MyHomePageState extends State<MyHomePage> {
                         FilePickerResult result =
                             await FilePicker.platform.pickFiles();
 
-                        if (result != null) {
-                          try {
-                            final _file = File(result.files.single.path);
-                            String contents = await _file.readAsString();
-                            Provider.of<AccountsModel>(context, listen: false)
-                                .addAll(contents);
-                            Navigator.pop(context);
-                          } catch (e) {
-                            print(e);
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(
-                                  "Oops, something went wrong while importing. Please correct any errors in your Accounts CSV and try again."),
-                            ));
-                          }
+                        try {
+                          final _file = File(result.files.single.path);
+                          String contents = await _file.readAsString();
+                          Provider.of<AccountsModel>(context, listen: false)
+                              .addAll(contents);
+                          Navigator.pop(context);
+                        } catch (e) {
+                          print(e);
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text(
+                                "Oops, something went wrong while importing. Please correct any errors in your Accounts CSV and try again.",),
+                          ),);
                         }
-                      }),
+                                            },),
                   ListTile(
-                      title: Text('Export'),
+                      title: const Text('Export'),
                       onTap: () async {
                         final _success = await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Export(),
+                            builder: (context) => const Export(),
                           ),
                         );
 
                         if (_success != null && _success) {
                           Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text("Transactions exported!")));
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                              content: Text("Transactions exported!"),),);
                         }
-                      }),
+                      },),
                   ListTile(
-                      title: Text('Favorites'),
+                      title: const Text('Favorites'),
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Favorites(),
+                            builder: (context) => const Favorites(),
                           ),
                         );
-                      }),
+                      },),
                   ListTile(
-                      title: Text('Delete Accounts'),
+                      title: const Text('Delete Accounts'),
                       onTap: () {
                         _showConfirm(context, 'Are you sure you want to delete accounts?', () {
                           Provider.of<AccountsModel>(context, listen: false)
                               .removeAll();
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Accounts deleted.")));
+                              const SnackBar(content: Text("Accounts deleted.")),);
                         }, () {
                           Navigator.of(context).pop();
                         });
-                      }),
+                      },),
                   FutureBuilder(
                     future:
                         Provider.of<TransactionsModel>(context, listen: true)
@@ -168,56 +166,56 @@ class _MyHomePageState extends State<MyHomePage> {
                         (context, AsyncSnapshot<List<Transaction>> snapshot) {
                       return ListTile(
                           title: Text(
-                              'Delete ${snapshot.hasData ? snapshot.data.length ~/ 2 : 0} Transaction(s)'),
+                              'Delete ${snapshot.hasData ? snapshot.data.length ~/ 2 : 0} Transaction(s)',),
                           onTap: () {
                             if (!snapshot.hasData ||
                                 snapshot.data.length == 0) {
                               Navigator.pop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
+                                  const SnackBar(
                                       content:
-                                          Text("No transactions to delete.")));
+                                          Text("No transactions to delete."),),);
                             }
 
                             _showConfirm(context, 'Are you sure you want to delete transactions?', () {
                               Provider.of<TransactionsModel>(context,
-                                  listen: false)
+                                  listen: false,)
                                   .removeAll();
                               Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                  content: Text("Transactions deleted.")));
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                  content: Text("Transactions deleted."),),);
                             }, () {
                               Navigator.of(context).pop();
                             });
-                          });
+                          },);
                     },
                   ),
                 ],
-              )),
+              ),),
               floatingActionButton: _hasImported
                   ? Builder(builder: (context) {
                       return FloatingActionButton(
                         backgroundColor: Constants.darkBG,
-                        child: Icon(Icons.add),
+                        child: const Icon(Icons.add),
                         onPressed: () async {
                           final _success = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => TransactionForm(),
+                              builder: (context) => const TransactionForm(),
                             ),
                           );
 
                           if (_success != null && _success) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Text("Transaction created!")));
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                content: Text("Transaction created!"),),);
                           }
                         },
                       );
-                    })
+                    },)
                   : null,
             );
-          });
-    });
+          },);
+    },);
   }
 
   void _showConfirm(BuildContext context, String message, Function() onConfirm, Function() onCancel) async {
@@ -226,7 +224,7 @@ class _MyHomePageState extends State<MyHomePage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirm'),
+          title: const Text('Confirm'),
           content: SingleChildScrollView(
             child: Column(
               children: <Widget>[
@@ -236,11 +234,11 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Yes'),
+              child: const Text('Yes'),
               onPressed: onConfirm,
             ),
             TextButton(
-              child: Text('No'),
+              child: const Text('No'),
               onPressed: onCancel,
             ),
           ],

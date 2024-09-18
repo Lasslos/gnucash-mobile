@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:provider/provider.dart';
 
-import '../constants.dart';
+import 'package:gnucash_mobile/constants.dart';
 
 class Favorites extends StatelessWidget {
+  const Favorites({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AccountsModel>(builder: (context, accounts, child) {
       return Scaffold(
         appBar: AppBar(
           backgroundColor: Constants.darkBG,
-          title: Text("Favorites"),
+          title: const Text("Favorites"),
         ),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32.0),
@@ -24,7 +26,7 @@ class Favorites extends StatelessWidget {
                         .favoriteDebitAccount,
                     builder: (context, AsyncSnapshot<Account> snapshot) {
                       return DropdownButton<Account>(
-                        hint: Text("Favorite Debit Account"),
+                        hint: const Text("Favorite Debit Account"),
                         isExpanded: true,
                         // TODO: Put recently used first
                         items: accounts.validTransactionAccounts.map((account) {
@@ -42,16 +44,16 @@ class Favorites extends StatelessWidget {
                         value: snapshot.hasData
                             ? accounts.validTransactionAccounts.firstWhere(
                                 (account) =>
-                                    account.fullName == snapshot.data.fullName)
+                                    account.fullName == snapshot.data.fullName,)
                             : null,
                       );
-                    }),
+                    },),
                 FutureBuilder<Account>(
                     future: Provider.of<AccountsModel>(context, listen: false)
                         .favoriteCreditAccount,
                     builder: (context, AsyncSnapshot<Account> snapshot) {
                       return DropdownButton<Account>(
-                        hint: Text("Favorite Credit Account"),
+                        hint: const Text("Favorite Credit Account"),
                         isExpanded: true,
                         // TODO: Put recently used first
                         items: accounts.validTransactionAccounts.map((account) {
@@ -69,18 +71,18 @@ class Favorites extends StatelessWidget {
                         value: snapshot.hasData
                             ? accounts.validTransactionAccounts.firstWhere(
                                 (account) =>
-                                    account.fullName == snapshot.data.fullName)
+                                    account.fullName == snapshot.data.fullName,)
                             : null,
                       );
-                    }),
-                Divider(
+                    },),
+                const Divider(
                   height: 50,
                   color: Colors.transparent,
                 ),
                 TextButton(
                   style: ButtonStyle(
                     backgroundColor:
-                        MaterialStateProperty.all<Color>(Constants.darkAccent),
+                        WidgetStateProperty.all<Color>(Constants.darkAccent),
                   ),
                   onPressed: () {
                     accounts.removeFavoriteDebitAccount();
@@ -95,7 +97,7 @@ class Favorites extends StatelessWidget {
                 TextButton(
                   style: ButtonStyle(
                     backgroundColor:
-                        MaterialStateProperty.all<Color>(Constants.darkAccent),
+                        WidgetStateProperty.all<Color>(Constants.darkAccent),
                   ),
                   onPressed: () {
                     accounts.removeFavoriteCreditAccount();
@@ -112,6 +114,6 @@ class Favorites extends StatelessWidget {
           ),
         ),
       );
-    });
+    },);
   }
 }

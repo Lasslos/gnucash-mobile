@@ -4,21 +4,22 @@ import 'dart:io';
 // This works on Android, but on iOS we can't write a file to external storage.
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:gnucash_mobile/providers/transactions.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../constants.dart';
+import 'package:gnucash_mobile/constants.dart';
 
 class Export extends StatefulWidget {
+  const Export({super.key});
+
   @override
   _ExportState createState() => _ExportState();
 }
 
 class _ExportState extends State<Export> {
-  String _directoryPath;
-  String _directory;
+  late String _directoryPath;
+  late String _directory;
 
   bool deleteTransactionsOnExport = false;
 
@@ -47,7 +48,7 @@ class _ExportState extends State<Export> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Export Transactions"),
+        title: const Text("Export Transactions"),
       ),
       body: Center(
         child: FutureBuilder(
@@ -68,7 +69,7 @@ class _ExportState extends State<Export> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 30.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 30.0),
                     child: Platform.isIOS
                         ? Text(
                             "$_text will be written to this application's directory (/On My iPhone/GnuCashMobile)",
@@ -76,11 +77,11 @@ class _ExportState extends State<Export> {
                         : Text("Export to: $_directory"),
                   ),
                   Platform.isIOS
-                      ? SizedBox.shrink()
+                      ? const SizedBox.shrink()
                       : TextButton(
                           style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                                Constants.darkAccent),
+                            backgroundColor: WidgetStateProperty.all<Color>(
+                                Constants.darkAccent,),
                           ),
                           onPressed: () => _selectFolder(),
                           child: Text(
@@ -92,8 +93,8 @@ class _ExportState extends State<Export> {
                         ),
                   CheckboxListTile(
                     contentPadding:
-                        EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0),
-                    title: Text('Delete transactions on successful export'),
+                        const EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0),
+                    title: const Text('Delete transactions on successful export'),
                     value: deleteTransactionsOnExport,
                     onChanged: (value) {
                       setState(() {
@@ -103,19 +104,13 @@ class _ExportState extends State<Export> {
                   ),
                   TextButton(
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          Constants.darkAccent),
+                      backgroundColor: WidgetStateProperty.all<Color>(
+                          Constants.darkAccent,),
                     ),
                     onPressed: () async {
-                      if (_directoryPath == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text("Please choose a valid directory")));
-                        return null;
-                      }
-
                       if (!snapshot.hasData) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text("No transactions to export.")));
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text("No transactions to export."),),);
                         return;
                       }
 
@@ -135,7 +130,7 @@ class _ExportState extends State<Export> {
                       } catch (e) {
                         print(e);
                         ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Error exporting!")));
+                            const SnackBar(content: Text("Error exporting!")),);
                       }
                     },
                     child: Text(
@@ -147,7 +142,7 @@ class _ExportState extends State<Export> {
                   ),
                 ],
               );
-            }),
+            },),
       ),
     );
   }

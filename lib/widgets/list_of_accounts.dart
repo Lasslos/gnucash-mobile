@@ -6,18 +6,18 @@ import 'package:gnucash_mobile/widgets/transactions_view.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../constants.dart';
-import 'account_view.dart';
+import 'package:gnucash_mobile/constants.dart';
+import 'package:gnucash_mobile/widgets/account_view.dart';
 
 class ListOfAccounts extends StatelessWidget {
   final List<Account> accounts;
 
-  ListOfAccounts({Key key, @required this.accounts}) : super(key: key);
+  const ListOfAccounts({Key key, @required this.accounts}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final _simpleCurrencyNumberFormat = NumberFormat.simpleCurrency(
-        locale: Localizations.localeOf(context).toString());
+        locale: Localizations.localeOf(context).toString(),);
 
     return Container(
       child: Consumer<TransactionsModel>(
@@ -25,7 +25,7 @@ class ListOfAccounts extends StatelessWidget {
         return ListView.builder(
           itemBuilder: (context, index) {
             if (index.isOdd) {
-              return Divider();
+              return const Divider();
             }
 
             final int i = index ~/ 2;
@@ -39,11 +39,11 @@ class ListOfAccounts extends StatelessWidget {
                 in transactionsModel.transactionsByAccountFullName.keys) {
               if (key.startsWith(_account.fullName)) {
                 _transactions.addAll(
-                    transactionsModel.transactionsByAccountFullName[key]);
+                    transactionsModel.transactionsByAccountFullName[key],);
               }
             }
             final double _balance = _transactions.fold(0.0,
-                (previousValue, element) => previousValue + element.amount);
+                (previousValue, element) => previousValue + element.amount,);
             final _simpleCurrencyValue = _simpleCurrencyNumberFormat.format(_balance);
 
             return ListTile(
@@ -52,10 +52,10 @@ class ListOfAccounts extends StatelessWidget {
                 style: Constants.biggerFont,
               ),
               trailing: Text(
-                _simpleCurrencyValue
+                _simpleCurrencyValue,
               ),
               onTap: () {
-                if (_account.children.length == 0) {
+                if (_account.children.isEmpty) {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) {
@@ -67,14 +67,14 @@ class ListOfAccounts extends StatelessWidget {
                         body: TransactionsView(
                             transactions: Provider.of<TransactionsModel>(
                                             context,
-                                            listen: true)
+                                            listen: true,)
                                         .transactionsByAccountFullName[
                                     _account.fullName] ??
-                                []),
+                                [],),
                         floatingActionButton: Builder(builder: (context) {
                           return FloatingActionButton(
                             backgroundColor: Constants.darkBG,
-                            child: Icon(Icons.add),
+                            child: const Icon(Icons.add),
                             onPressed: () async {
                               final _success = await Navigator.push(
                                 context,
@@ -87,14 +87,14 @@ class ListOfAccounts extends StatelessWidget {
 
                               if (_success != null && _success) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content: Text("Transaction created!")));
+                                    const SnackBar(
+                                        content: Text("Transaction created!"),),);
                               }
                             },
                           );
-                        }),
+                        },),
                       );
-                    }),
+                    },),
                   );
                 } else {
                   Navigator.push(
@@ -107,10 +107,10 @@ class ListOfAccounts extends StatelessWidget {
               },
             );
           },
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           shrinkWrap: true,
         );
-      }),
+      },),
     );
   }
 }

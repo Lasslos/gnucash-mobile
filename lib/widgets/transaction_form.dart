@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:gnucash_mobile/providers/transactions.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../constants.dart';
+import 'package:gnucash_mobile/constants.dart';
 
 class TransactionForm extends StatefulWidget {
   final Account toAccount;
 
-  TransactionForm({Key key, this.toAccount}) : super(key: key);
+  const TransactionForm({Key key, this.toAccount}) : super(key: key);
   @override
   _TransactionFormState createState() => _TransactionFormState();
 }
@@ -26,7 +25,7 @@ class _TransactionFormState extends State<TransactionForm> {
   final _visibleAmountInputController = TextEditingController();
   final _dateInputController = TextEditingController();
   // Credit account, debit account
-  final _transactions = [Transaction(), Transaction()];
+  final _transactions = [const Transaction(), const Transaction()];
 
   @override
   void dispose() {
@@ -39,20 +38,20 @@ class _TransactionFormState extends State<TransactionForm> {
   Widget build(BuildContext context) {
     final _node = FocusScope.of(context);
     final _simpleCurrencyNumberFormat = NumberFormat.simpleCurrency(
-        locale: Localizations.localeOf(context).toString());
+        locale: Localizations.localeOf(context).toString(),);
 
     return Consumer<AccountsModel>(builder: (context, accounts, child) {
       return Scaffold(
         appBar: AppBar(
           backgroundColor: Constants.darkBG,
-          title: Text("New transaction"),
+          title: const Text("New transaction"),
           leading: Builder(builder: (context) {
             return IconButton(
               icon: const Icon(Icons.clear),
               onPressed: () => Navigator.pop(context),
               tooltip: MaterialLocalizations.of(context).backButtonTooltip,
             );
-          }),
+          },),
         ),
         body: Form(
           autovalidateMode: AutovalidateMode.disabled,
@@ -66,7 +65,7 @@ class _TransactionFormState extends State<TransactionForm> {
                   decoration: const InputDecoration(
                     hintText: 'Amount',
                   ),
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   onEditingComplete: () => _node.nextFocus(),
                   onSaved: (value) {
                     final _amount = _simpleCurrencyNumberFormat.parse(value);
@@ -147,14 +146,14 @@ class _TransactionFormState extends State<TransactionForm> {
                         value: snapshot.hasData
                             ? accounts.validTransactionAccounts.firstWhere(
                                 (account) =>
-                                    account.fullName == snapshot.data.fullName)
+                                    account.fullName == snapshot.data.fullName,)
                             : widget.toAccount != null
                                 ? accounts.validTransactionAccounts.firstWhere(
                                     (account) =>
                                         account.fullName ==
-                                        widget.toAccount.fullName)
-                                : null);
-                  }),
+                                        widget.toAccount.fullName,)
+                                : null,);
+                  },),
               FutureBuilder<Account>(
                   future: Provider.of<AccountsModel>(context, listen: false)
                       .favoriteDebitAccount,
@@ -185,10 +184,10 @@ class _TransactionFormState extends State<TransactionForm> {
                       value: snapshot.hasData
                           ? accounts.validTransactionAccounts.firstWhere(
                               (account) =>
-                                  account.fullName == snapshot.data.fullName)
+                                  account.fullName == snapshot.data.fullName,)
                           : null,
                     );
-                  }),
+                  },),
               TextFormField(
                 decoration: const InputDecoration(
                   hintText: 'Date',
@@ -239,7 +238,7 @@ class _TransactionFormState extends State<TransactionForm> {
             // Builder(builder: (context) {
             FloatingActionButton(
           backgroundColor: Constants.darkBG,
-          child: Icon(Icons.save_sharp),
+          child: const Icon(Icons.save_sharp),
           onPressed: () {
             // Validate will return true if the form is valid, or false if
             // the form is invalid.
@@ -260,6 +259,6 @@ class _TransactionFormState extends State<TransactionForm> {
           },
         ),
       );
-    });
+    },);
   }
 }

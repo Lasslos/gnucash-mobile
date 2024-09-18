@@ -6,19 +6,19 @@ import 'package:provider/provider.dart';
 class TransactionsView extends StatelessWidget {
   final List<Transaction> transactions;
 
-  TransactionsView({Key key, @required this.transactions}) : super(key: key);
+  const TransactionsView({Key key, @required this.transactions}) : super(key: key);
 
 
   @override
   Widget build(BuildContext context) {
     final _simpleCurrencyNumberFormat = NumberFormat.simpleCurrency(
-        locale: Localizations.localeOf(context).toString());
+        locale: Localizations.localeOf(context).toString(),);
 
     return Consumer<TransactionsModel>(builder: (context, transactions, child) {
       final _transactionsBuilder = ListView.builder(
         itemBuilder: (context, index) {
           if (index.isOdd) {
-            return Divider();
+            return const Divider();
           }
 
           final int i = index ~/ 2;
@@ -35,7 +35,7 @@ class TransactionsView extends StatelessWidget {
             onDismissed: (direction) async {
               transactions.remove(_transaction);
               ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text("Transaction removed.")));
+                  .showSnackBar(const SnackBar(content: Text("Transaction removed.")));
             },
             child: ListTile(
                 title: Text(
@@ -44,18 +44,18 @@ class TransactionsView extends StatelessWidget {
                 trailing: Text(_simpleCurrencyValue),
                 onTap: () {
                   print(_transaction);
-                }),
+                },),
           );
         },
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         shrinkWrap: true,
       );
 
       return Container(
-        child: this.transactions.length > 0
+        child: this.transactions.isNotEmpty
             ? _transactionsBuilder
-            : Center(child: Text("No transactions.")),
+            : const Center(child: Text("No transactions.")),
       );
-    });
+    },);
   }
 }

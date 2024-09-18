@@ -5,7 +5,7 @@ import 'package:gnucash_mobile/providers/accounts.dart';
 
 void main() async {
   test("test JSON conversion", () {
-    final accountString = """{
+    const accountString = """{
          \"balance\":0.0,
          \"children\":[
             {

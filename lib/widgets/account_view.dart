@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
-import 'package:gnucash_mobile/providers/transactions.dart';
 import 'package:gnucash_mobile/widgets/list_of_accounts.dart';
 import 'package:gnucash_mobile/widgets/transaction_form.dart';
 import 'package:gnucash_mobile/widgets/transactions_view.dart';
-import 'package:provider/provider.dart';
 
-import '../constants.dart';
+import 'package:gnucash_mobile/constants.dart';
 
 class AccountView extends StatelessWidget {
   final Account account;
 
-  AccountView({Key key, @required this.account}) : super(key: key);
+  const AccountView({required this.account, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,22 +24,22 @@ class AccountView extends StatelessWidget {
         floatingActionButton: Builder(builder: (context) {
           return FloatingActionButton(
             backgroundColor: Constants.darkBG,
-            child: Icon(Icons.add),
+            child: const Icon(Icons.add),
             onPressed: () async {
               final _success = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => TransactionForm(),
+                  builder: (context) => const TransactionForm(),
                 ),
               );
 
               if (_success != null && _success) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Transaction created!")));
+                    const SnackBar(content: Text("Transaction created!")),);
               }
             },
           );
-        }),
+        },),
       );
     }
 
@@ -50,7 +48,7 @@ class AccountView extends StatelessWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          bottom: TabBar(
+          bottom: const TabBar(
             tabs: [
               Tab(icon: Icon(Icons.account_tree_sharp)),
               Tab(icon: Icon(Icons.account_balance_sharp)),
@@ -63,15 +61,15 @@ class AccountView extends StatelessWidget {
             ListOfAccounts(accounts: this.account.children),
             TransactionsView(
                 transactions: Provider.of<TransactionsModel>(context,
-                            listen: true)
+                            listen: true,)
                         .transactionsByAccountFullName[this.account.fullName] ??
-                    [])
+                    [],),
           ],
         ),
         floatingActionButton: Builder(builder: (context) {
           return FloatingActionButton(
             backgroundColor: Constants.darkBG,
-            child: Icon(Icons.add),
+            child: const Icon(Icons.add),
             onPressed: () async {
               final _success = await Navigator.push(
                 context,
@@ -84,11 +82,11 @@ class AccountView extends StatelessWidget {
 
               if (_success != null && _success) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Transaction created!")));
+                    const SnackBar(content: Text("Transaction created!")),);
               }
             },
           );
-        }),
+        },),
       ),
     );
   }
