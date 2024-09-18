@@ -124,9 +124,8 @@ class Accounts extends _$Accounts {
 
       lookup[account.fullName] = account;
     }
-    return hierarchicalAccounts;
+    return List.unmodifiable(hierarchicalAccounts);
   }
-
 
   Future<void> setAccounts(String csv) async {
     _accountCSV = csv;
@@ -140,7 +139,7 @@ class Accounts extends _$Accounts {
     Directory directory = await getApplicationSupportDirectory();
     File file = File('${directory.path}/accounts.csv');
     await file.writeAsString("");
-    state = [];
+    state = List.unmodifiable([]);
   }
 }
 
