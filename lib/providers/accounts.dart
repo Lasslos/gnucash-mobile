@@ -1,254 +1,189 @@
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
-
 import 'package:csv/csv.dart';
 import 'package:csv/csv_settings_autodetection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:gnucash_mobile/utils.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-class Account {
-  double balance = 0.0; // non-standard
-  List<Account> children = []; // non-standard
-  String code;
-  String commodityM;
-  String commodityN;
-  String color;
-  String description;
-  String fullName;
-  bool hidden;
-  String notes;
-  String parentFullName; // non-standard
-  bool placeholder; // Whether transactions can be placed in this account?
-  bool tax;
-  String type;
-  String name;
+part 'accounts.freezed.dart';
+part 'accounts.g.dart';
 
-  Account.fromJson(Map<String, dynamic> json) {
-    this.balance = json['balance'];
-    this.children = [];
-    if (json['children'] != null) {
-      final List<dynamic> rawChildren = json['children'];
-      rawChildren.forEach((element) {
-        this.children.add(Account.fromJson(element));
-      });
+late String _accountCSV;
+/// TODO: Initialize in main.dart
+Future<void> initAccounts() async {
+  /// TODO: Using applicationSupportDirectory is discouraged for userData, migrate to SharedPreferences
+  Directory directory = await getApplicationSupportDirectory();
+  File file = File('${directory.path}/accounts.csv');
+  if (!file.existsSync()) {
+    _accountCSV = "";
+    return;
+  }
+  _accountCSV = await file.readAsString();
+}
+
+Future<void> setAccounts(String csv) async {
+  _accountCSV = csv;
+  Directory directory = await getApplicationSupportDirectory();
+  File file = File('${directory.path}/accounts.csv');
+  await file.writeAsString(csv);
+}
+
+Future<void> clearAccounts() async {
+  _accountCSV = "";
+  Directory directory = await getApplicationSupportDirectory();
+  File file = File('${directory.path}/accounts.csv');
+  await file.writeAsString("");
+}
+
+@Freezed(makeCollectionsUnmodifiable: false)
+class Account with _$Account {
+  const factory Account({
+    required String type,
+    required String fullName,
+    required String name,
+    required String code,
+    required String description,
+    required String color,
+    required String notes,
+    required String commodityM,
+    required String commodityN,
+    required bool hidden,
+    required bool tax,
+    required bool placeholder,
+
+    @Default(0) double balance,
+    @Default([]) List<Account> children,
+    String? parentFullName,
+  }) = _Account;
+
+  const Account._();
+
+  factory Account.fromJson(Map<String, dynamic> json) => _$AccountFromJson(json);
+
+  factory Account.fromCSVLine(List<String> line) {
+    line = line.map((e) => e.trim()).toList();
+
+    // Check if account has parent.
+    // The full name of the account is in the form
+    // "Parent:Child:Grandchild:..."
+    String fullName = line[1];
+    int lastIndex = fullName.lastIndexOf(":");
+    String? parentFullName;
+    if (lastIndex > 0) {
+      parentFullName = fullName.substring(0, lastIndex);
     }
-    code = json['code'];
-    commodityM = json['commodityM'];
-    commodityN = json['commodityN'];
-    color = json['color'];
-    description = json['description'];
-    fullName = json['fullName'];
-    hidden = json['hidden'];
-    name = json['name'];
-    notes = json['notes'];
-    parentFullName = json['parentFullName'];
-    placeholder = json['placeholder'];
-    tax = json['tax'];
-    type = json['type'];
-  }
 
-  Map<String, dynamic> toJson() {
-    final json = {
-      'balance': balance,
-      'children': children,
-      'code': code,
-      'commodityM': commodityM,
-      'commodityN': commodityN,
-      'color': color,
-      'description': description,
-      'fullName': fullName,
-      'hidden': hidden,
-      'name': name,
-      'notes': notes,
-      'parentFullName': parentFullName,
-      'placeholder': placeholder,
-      'tax': tax,
-      'type': type
-    };
-
-    return json;
-  }
-
-  Account.fromList(List<dynamic> items) {
-    final trimmed = [];
-    for (var item in items) trimmed.add(item.trim());
-
-    this.type = trimmed[0];
-    this.fullName = trimmed[1];
-    this.name = trimmed[2];
-    this.code = trimmed[3];
-    this.description = trimmed[4];
-    this.color = trimmed[5];
-    this.notes = trimmed[6];
-    this.commodityM = trimmed[7];
-    this.commodityN = trimmed[8];
-    this.hidden = trimmed[9] == 'T' ? true : false;
-    this.tax = trimmed[10] == 'T' ? true : false;
-    this.placeholder = trimmed[11] == 'T' ? true : false;
-  }
-
-  @override
-  toString() {
-    return "Account{balance: ${this.balance}, children: List<Account>[${this.children ?? [].length}], code: ${this.code}, commodityM: ${this.commodityM}, commodityN: ${this.commodityN}, color: ${this.color}, description: ${this.description}, fullName: ${this.fullName}, hidden: ${this.hidden}, notes: ${this.notes}, parentFullName: ${this.parentFullName}, placeholder: ${this.placeholder}, tax: ${this.tax}, type: ${this.type}, name: ${this.name}}";
+    return Account(
+      type: line[0],
+      fullName: line[1],
+      name: line[2],
+      code: line[3],
+      description: line[4],
+      color: line[5],
+      notes: line[6],
+      commodityM: line[7],
+      commodityN: line[8],
+      hidden: line[9] == 'T',
+      tax: line[10] == 'T',
+      placeholder: line[11] == 'T',
+      parentFullName: parentFullName,
+    );
   }
 }
 
-class AccountsModel extends ChangeNotifier {
-  final _prefs = SharedPreferences.getInstance();
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationSupportDirectory();
-    return directory.path;
+/// Stores and exposes the accounts.
+@Riverpod(keepAlive: true)
+class Accounts extends _$Accounts {
+  @override
+  List<Account> build() {
+    return _getCachedAccounts();
   }
 
-  Future<File> get _localFile async {
-    final path = await _localPath;
-    return File('$path/accounts.csv');
-  }
+  List<Account> _getCachedAccounts() {
+    // Using _accountCSV.
+    // TODO: Migrate data collection to SharedPreferences
 
-  List<Account> _validTransactionAccounts = [];
-
-  Future<Account> get favoriteDebitAccount async {
-    final prefs = await _prefs;
-    final favoriteDebitAccountString = prefs.getString('favoriteDebitAccount');
-
-    if (favoriteDebitAccountString != null) {
-      return Account.fromJson(jsonDecode(favoriteDebitAccountString));
-    } else {
-      return null;
-    }
-  }
-
-  void setFavoriteDebitAccount(Account account) async {
-    final prefs = await _prefs;
-    await prefs.setString('favoriteDebitAccount', jsonEncode(account));
-
-    notifyListeners();
-  }
-
-  void removeFavoriteDebitAccount() async {
-    final prefs = await _prefs;
-    await prefs.remove('favoriteDebitAccount');
-
-    notifyListeners();
-  }
-
-  Future<Account> get favoriteCreditAccount async {
-    final prefs = await _prefs;
-    final favoriteCreditAccountString =
-        prefs.getString('favoriteCreditAccount') ?? null;
-
-    if (favoriteCreditAccountString != null) {
-      return Account.fromJson(jsonDecode(favoriteCreditAccountString));
-    } else {
-      return null;
-    }
-  }
-
-  void setFavoriteCreditAccount(Account account) async {
-    final prefs = await _prefs;
-    await prefs.setString('favoriteCreditAccount', jsonEncode(account));
-
-    notifyListeners();
-  }
-
-  void removeFavoriteCreditAccount() async {
-    final prefs = await _prefs;
-    await prefs.remove('favoriteCreditAccount');
-
-    notifyListeners();
-  }
-
-  final List<Account> _recentCreditAccounts = [];
-  final List<Account> _recentDebitAccounts = [];
-  List<Account> _accounts;
-
-  UnmodifiableListView<Account> get validTransactionAccounts =>
-      UnmodifiableListView(_validTransactionAccounts);
-  UnmodifiableListView<Account> get recentCreditAccounts =>
-      UnmodifiableListView(_recentCreditAccounts);
-  UnmodifiableListView<Account> get recentDebitAccounts =>
-      UnmodifiableListView(_recentDebitAccounts);
-
-  List<Account> parseAccountCSV(String csv) {
-    var _detector = new FirstOccurrenceSettingsDetector(
+    // Convert CSV to List<List<String>>
+    const detector = FirstOccurrenceSettingsDetector(
       eols: ['\r\n', '\n'],
     );
-
-    final _converter = CsvToListConverter(
-      csvSettingsDetector: _detector,
+    const converter = CsvToListConverter(
+      csvSettingsDetector: detector,
       textDelimiter: '"',
       shouldParseNumbers: false,
     );
+    List<List<String>> parsedCSV = converter.convert(_accountCSV.trim())
+      ..removeAt(0); // Remove header row
 
-    final _parsed = _converter.convert(csv.trim());
-    // Remove header row
-    _parsed.removeAt(0);
+    // Convert List<List<String>> to List<Account>
+    List<Account> accounts = parsedCSV.map((csvLine) => Account.fromCSVLine(csvLine)).toList();
 
-    final _accounts = <Account>[];
-    final _transactionAccounts = <Account>[];
-    for (var line in _parsed) {
-      final _account = Account.fromList(line);
-      final _lastIndex = _account.fullName.lastIndexOf(":");
-      final _hasParent = _lastIndex > 0;
-      var _parentFullName = '';
-      if (_hasParent) {
-        _parentFullName = _account.fullName.substring(0, _lastIndex);
-      }
+    Map<String, Account> lookup = {};
+    List<Account> hierarchicalAccounts = [];
 
-      _account.parentFullName = _parentFullName;
-      _accounts.add(_account);
-
-      if (!_account.placeholder) {
-        // This account is valid to make transactions to/from
-        _transactionAccounts.add(_account);
-      }
-    }
-    _validTransactionAccounts = _transactionAccounts;
-
-    final _lookup = Map<String, Account>();
-    final List<Account> _hierarchicalAccounts = [];
-
-    for (var _account in _accounts) {
-      if (_lookup.containsKey(_account.parentFullName)) {
-        final _parent = _lookup[_account.parentFullName];
-        _parent.children.add(_account);
+    // Build hierarchical accounts
+    // ToDo: Refactor
+    for (Account account in accounts) {
+      if (lookup.containsKey(account.parentFullName)) {
+        Account parent = lookup[account.parentFullName]!;
+        parent.children.add(account);
       } else {
-        _hierarchicalAccounts.add(_account);
+        hierarchicalAccounts.add(account);
       }
 
-      _lookup[_account.fullName] = _account;
+      lookup[account.fullName] = account;
     }
-    return _hierarchicalAccounts;
+    return hierarchicalAccounts;
+  }
+}
+
+@riverpod
+List<Account> validTransactionAccounts(ValidTransactionAccountsRef ref) {
+  return ref.watch(accountsProvider).where((account) => !account.placeholder).toList();
+}
+
+@riverpod
+class FavoriteDebitAccount extends _$FavoriteDebitAccount {
+  @override
+  Account? build() {
+    String? json = sharedPreferences.getString('favoriteDebitAccount');
+    if (json == null) {
+      return null;
+    }
+    return Account.fromJson(jsonDecode(json));
   }
 
-  Future<List<Account>> get accounts async {
-    final file = await _localFile;
-    String csvString = await file.readAsString();
-    final _parsedAccounts = parseAccountCSV(csvString);
-    _accounts = _parsedAccounts;
+  void setFavoriteDebitAccount(Account account) {
+    sharedPreferences.setString('favoriteDebitAccount', jsonEncode(account.toJson()));
+    state = account;
+  }
+  void clearFavoriteDebitAccount() {
+    sharedPreferences.remove('favoriteDebitAccount');
+    state = null;
+  }
+}
 
-    return _parsedAccounts;
+@riverpod
+class FavoriteCreditAccount extends _$FavoriteCreditAccount {
+  @override
+  Account? build() {
+    String? json = sharedPreferences.getString('favoriteCreditAccount');
+    if (json == null) {
+      return null;
+    }
+    return Account.fromJson(jsonDecode(json));
   }
 
-  Account getAccountByFullName(String fullName) {
-    return _accounts.firstWhere((element) => element.fullName == fullName);
+  void set(Account account) {
+    sharedPreferences.setString('favoriteCreditAccount', jsonEncode(account.toJson()));
+    state = account;
   }
-
-  void addAll(String csv) async {
-    final file = await _localFile;
-    file.writeAsString(csv);
-
-    notifyListeners();
-  }
-
-  void removeAll() async {
-    final file = await _localFile;
-    file.delete();
-
-    notifyListeners();
+  void clear() {
+    sharedPreferences.remove('favoriteCreditAccount');
+    state = null;
   }
 }
