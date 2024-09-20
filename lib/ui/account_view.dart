@@ -22,7 +22,7 @@ class AccountView extends ConsumerWidget {
         appBar: AppBar(
           title: Text(this.accountNode.account.fullName),
         ),
-        body: ListOfAccounts(accounts: accountNode.children.map((e) => e.account).toList()),
+        body: ListOfAccounts(accountNodes: accountNode.children),
         floatingActionButton: Builder(
           builder: (context) {
             return FloatingActionButton(
@@ -62,7 +62,7 @@ class AccountView extends ConsumerWidget {
         ),
         body: TabBarView(
           children: [
-            ListOfAccounts(accounts: accountNode.children.map((e) => e.account).toList()),
+            ListOfAccounts(accountNodes: accountNode.children),
             TransactionsView(
               transactions:
                   transactionsByAccountFullName[this.accountNode.account.fullName] ?? [],

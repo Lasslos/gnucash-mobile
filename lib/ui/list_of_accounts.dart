@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gnucash_mobile/core/models/account.dart';
+import 'package:gnucash_mobile/core/models/account_node.dart';
 import 'package:gnucash_mobile/core/models/transaction.dart';
 import 'package:gnucash_mobile/core/providers/transactions.dart';
 import 'package:gnucash_mobile/ui/account_view.dart';
@@ -9,9 +9,9 @@ import 'package:gnucash_mobile/ui/transactions_view.dart';
 import 'package:intl/intl.dart';
 
 class ListOfAccounts extends ConsumerWidget {
-  final List<Account> accounts;
+  final List<AccountNode> accountNodes;
 
-  const ListOfAccounts({required this.accounts, super.key});
+  const ListOfAccounts({required this.accountNodes, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -29,11 +29,13 @@ class ListOfAccounts extends ConsumerWidget {
         }
 
         final int i = index ~/ 2;
-        if (i >= this.accounts.length) {
+        if (i >= accountNodes.length) {
           return null;
         }
 
-        final _account = this.accounts[i];
+        final _accountNode = accountNodes[i];
+        final _account = _accountNode.account;
+
         final List<Transaction> _transactions = [];
         for (var key in transactionsByAccountFullName.keys) {
           if (key.startsWith(_account.fullName)) {
@@ -51,14 +53,14 @@ class ListOfAccounts extends ConsumerWidget {
 
         return ListTile(
           title: Text(
-            _account.name,
+            _accountNode.account.name,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           trailing: Text(
             _simpleCurrencyValue,
           ),
           onTap: () {
-            if (_account.children.isEmpty) {
+            if (_accountNode.children.isEmpty) {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -105,7 +107,7 @@ class ListOfAccounts extends ConsumerWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => AccountView(accountNode: _account),
+                  builder: (context) => AccountView(accountNode: _accountNode),
                 ),
               );
             }

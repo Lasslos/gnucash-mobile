@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gnucash_mobile/core/models/account.dart';
+import 'package:gnucash_mobile/core/models/account_node.dart';
 import 'package:gnucash_mobile/core/models/transaction.dart';
 import 'package:gnucash_mobile/core/providers/accounts.dart';
 import 'package:gnucash_mobile/core/providers/transactions.dart';
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "GnuCash Mobile",
+      title: "GnuCash Refined",
       theme: ThemeData(
         primarySwatch: Colors.blue,
         brightness: Brightness.light,
@@ -71,8 +72,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Account> accounts = ref.watch(accountsProvider);
-    bool hasImported = accounts.isNotEmpty;
+    List<AccountNode> accountNodes = ref.watch(accountsProvider);
+    bool hasImported = accountNodes.isNotEmpty;
 
     List<Transaction> transactions = ref.watch(transactionsProvider);
 
@@ -80,14 +81,14 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       appBar: AppBar(
         title: const Text('Accounts'),
       ),
-      body: hasImported ? ListOfAccounts(accounts: accounts) : const Intro(),
+      body: hasImported ? ListOfAccounts(accountNodes: accountNodes) : const Intro(),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
             const DrawerHeader(
               child: Text(
-                "GnuCash Mobile",
+                "GnuCash Refined",
                 style: TextStyle(
                   fontSize: 20,
                 ),

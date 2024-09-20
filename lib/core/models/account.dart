@@ -72,6 +72,7 @@ List<Account> parseAccountCSV(String csvString) {
   );
   List<List<String>> csv = const CsvToListConverter(
     csvSettingsDetector: detector,
+    shouldParseNumbers: false,
   ).convert(csvString);
   List<Account> accounts = [];
   if (csv.length <= 1) {
