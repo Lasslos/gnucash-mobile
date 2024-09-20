@@ -105,7 +105,7 @@ class ListOfAccounts extends ConsumerWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => AccountView(account: _account),
+                  builder: (context) => AccountView(accountNode: _account),
                 ),
               );
             }

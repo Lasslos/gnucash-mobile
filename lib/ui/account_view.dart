@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gnucash_mobile/core/models/account.dart';
+import 'package:gnucash_mobile/core/models/account_node.dart';
 import 'package:gnucash_mobile/core/models/transaction.dart';
 import 'package:gnucash_mobile/core/providers/transactions.dart';
 import 'package:gnucash_mobile/ui/list_of_accounts.dart';
@@ -8,21 +8,21 @@ import 'package:gnucash_mobile/ui/transaction_form.dart';
 import 'package:gnucash_mobile/ui/transactions_view.dart';
 
 class AccountView extends ConsumerWidget {
-  final Account account;
+  final AccountNode accountNode;
 
-  const AccountView({required this.account, super.key});
+  const AccountView({required this.accountNode, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Map<String, List<Transaction>> transactionsByAccountFullName =
         ref.watch(transactionsByAccountFullNameProvider);
     // Deliver simpler view if this account cannot hold transactions
-    if (this.account.placeholder) {
+    if (this.accountNode.account.placeholder) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(this.account.fullName),
+          title: Text(this.accountNode.account.fullName),
         ),
-        body: ListOfAccounts(accounts: this.account.children),
+        body: ListOfAccounts(accounts: accountNode.children.map((e) => e.account).toList()),
         floatingActionButton: Builder(
           builder: (context) {
             return FloatingActionButton(
@@ -58,14 +58,14 @@ class AccountView extends ConsumerWidget {
               Tab(icon: Icon(Icons.account_balance_sharp)),
             ],
           ),
-          title: Text(this.account.fullName),
+          title: Text(this.accountNode.account.fullName),
         ),
         body: TabBarView(
           children: [
-            ListOfAccounts(accounts: this.account.children),
+            ListOfAccounts(accounts: accountNode.children.map((e) => e.account).toList()),
             TransactionsView(
               transactions:
-                  transactionsByAccountFullName[this.account.fullName] ?? [],
+                  transactionsByAccountFullName[this.accountNode.account.fullName] ?? [],
             ),
           ],
         ),
@@ -78,7 +78,7 @@ class AccountView extends ConsumerWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => TransactionForm(
-                      toAccount: this.account,
+                      toAccount: accountNode.account,
                     ),
                   ),
                 );

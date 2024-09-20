@@ -1,0 +1,66 @@
+Typ,Volle Kontobezeichnung,Kontobezeichnung,Kontonummer,Beschreibung,Kontofarbe,Bemerkungen,Symbol,Namensraum,Versteckt,Steuerrelevante Information,Platzhalter
+ASSET,Aktiva,Aktiva,,Aktiva,,,EUR,CURRENCY,F,F,T
+ASSET,Aktiva:Barvermögen,Barvermögen,,Barvermögen,,,EUR,CURRENCY,F,F,T
+CASH,Aktiva:Barvermögen:Bargeld,Bargeld,,Bargeld,,,EUR,CURRENCY,F,F,F
+BANK,Aktiva:Barvermögen:Girokonto,Girokonto,,Girokonto,,,EUR,CURRENCY,F,F,F
+BANK,Aktiva:Barvermögen:Sparkonto,Sparkonto,,Sparkonto,,,EUR,CURRENCY,F,F,F
+LIABILITY,Fremdkapital,Fremdkapital,,alle Verbindlichkeiten,,,EUR,CURRENCY,F,F,T
+LIABILITY,Fremdkapital:Barverbindlichkeiten,Barverbindlichkeiten,,Barverbindlichkeiten (noch offenstehende Rechnungen),,,EUR,CURRENCY,F,F,T
+CREDIT,Fremdkapital:Barverbindlichkeiten:Kreditkarte,Kreditkarte,,Kreditkarte,,,EUR,CURRENCY,F,F,F
+LIABILITY,Fremdkapital:Kredite,Kredite,,Kredite,,,EUR,CURRENCY,F,F,T
+INCOME,Erträge,Erträge,,Erträge,,,EUR,CURRENCY,F,F,T
+INCOME,Erträge:Gehalt,Gehalt,,Gehalt und Zulagen,,,EUR,CURRENCY,F,F,T
+INCOME,Erträge:Gehalt:Gehalt,Gehalt,,Gehalt,,,EUR,CURRENCY,F,F,F
+INCOME,Erträge:Geschenke,Geschenke,,Empfangene Geschenke,,,EUR,CURRENCY,F,F,F
+INCOME,Erträge:Sonstiges,Sonstiges,,Sonstige Erträge,,,EUR,CURRENCY,F,F,F
+INCOME,Erträge:Untermiete,Untermiete,,Einnahmen für Wohnung,,,EUR,CURRENCY,F,F,F
+INCOME,Erträge:Zinsen,Zinsen,,Zinseinkommen,,,EUR,CURRENCY,F,F,T
+INCOME,Erträge:Zinsen:Girokonto,Girokonto,,Girokonto Zinsen,,,EUR,CURRENCY,F,F,F
+INCOME,Erträge:Zinsen:Sonstige,Sonstige,,Sonstige Zinsen,,,EUR,CURRENCY,F,F,F
+INCOME,Erträge:Zinsen:Sparkonto,Sparkonto,,Sparkonto Zinsen,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen,Aufwendungen,,Aufwendungen,,,EUR,CURRENCY,F,F,T
+EXPENSE,Aufwendungen:Bildung,Bildung,,Bildung,,,EUR,CURRENCY,F,F,T
+EXPENSE,Aufwendungen:Bildung:Abonnements,Abonnements,,Abonnements,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Bildung:Bücher,Bücher,,Bücher,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Bildung:Büroartikel,Büroartikel,,Büroartikel,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Bildung:Studiengebühren,Studiengebühren,,Studiengebühren,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Bildung:Zeitungen,Zeitungen,,Zeitungen,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Computer,Computer,,Computer,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Fahrtkosten,Fahrtkosten,,Fahrtkosten,,,EUR,CURRENCY,F,F,T
+EXPENSE,Aufwendungen:Fahrtkosten:Fahrkarten,Fahrkarten,,"Fahrkarten Bus, Bahn, Flugzeug",,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Geschenke,Geschenke,,Geschenke,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Hobbies,Hobbies,,Hobbies,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Kleidung,Kleidung,,Kleidung,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Lebensmittel,Lebensmittel,,Lebensmittel,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Medikamente,Medikamente,,Medikamente,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Sonstiges,Sonstiges,,Sonstiges,,,EUR,CURRENCY,F,F,T
+EXPENSE,Aufwendungen:Sonstiges:Bankgebühren,Bankgebühren,,Konto- und Bankgebühren,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Sonstiges:Sonstiges,Sonstiges,,nicht aufgegliederte Ausgaben,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Spenden,Spenden,,Wohltätige Spenden,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Steuern,Steuern,,Steuern und Sozialabgaben,,,EUR,CURRENCY,F,F,T
+EXPENSE,Aufwendungen:Steuern:Einkommensteuer,Einkommensteuer,,Einkommensteuer,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Steuern:Pflegeversicherung,Pflegeversicherung,,Pflegeversicherung,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Steuern:Rentenversicherung,Rentenversicherung,,Rentenversicherung,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Steuern:Solidaritätszuschlag,Solidaritätszuschlag,,Solidaritätszuschlag,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Steuern:Sonstige,Sonstige,,Sonstige Steuern,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Steuern:Sozialabgaben,Sozialabgaben,,Sonstige Sozialabgaben,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Telekommunikation,Telekommunikation,,Telekommunikation,,,EUR,CURRENCY,F,F,T
+EXPENSE,Aufwendungen:Telekommunikation:Fernsehen,Fernsehen,,GEZ und Kabelfernsehen,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Telekommunikation:Online-Dienste,Online-Dienste,,Online-Dienste,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Telekommunikation:Telefon,Telefon,,Telefon,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Unterhaltung,Unterhaltung,,Unterhaltung,,,EUR,CURRENCY,F,F,T
+EXPENSE,Aufwendungen:Unterhaltung:Ausgehen,Ausgehen,,Auswärts Essen,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Unterhaltung:Musik/Kino,Musik/Kino,,Musik/Kino,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Unterhaltung:Reisen,Reisen,,Reisen,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Unterhaltung:Sport,Sport,,Sport,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Versicherungen,Versicherungen,,Versicherungen,,,EUR,CURRENCY,F,F,T
+EXPENSE,Aufwendungen:Versicherungen:Haftpflicht,Haftpflicht,,Haftpflichtversicherung,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Versicherungen:Krankenversicherung,Krankenversicherung,,Krankenversicherung,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Wohnen,Wohnen,,Ausgaben für Wohnung,,,EUR,CURRENCY,F,F,T
+EXPENSE,Aufwendungen:Wohnen:Miete,Miete,,Miete,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Wohnen:Nebenkosten,Nebenkosten,,Wohnnebenkosten,,,EUR,CURRENCY,F,F,T
+EXPENSE,Aufwendungen:Wohnen:Nebenkosten:Abfall,Abfall,,Abfallentsorgung,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Wohnen:Nebenkosten:Gas,Gas,,Gas,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Wohnen:Nebenkosten:Strom,Strom,,Strom,,,EUR,CURRENCY,F,F,F
+EXPENSE,Aufwendungen:Wohnen:Nebenkosten:Wasser,Wasser,,Wasser,,,EUR,CURRENCY,F,F,F
+EQUITY,Anfangsbestand,Anfangsbestand,,Anfangsbestand,,,EUR,CURRENCY,F,F,F

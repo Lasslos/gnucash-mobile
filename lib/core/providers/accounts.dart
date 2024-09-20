@@ -3,12 +3,11 @@ import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 
-import 'package:csv/csv.dart';
-import 'package:csv/csv_settings_autodetection.dart';
 import 'package:gnucash_mobile/utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:gnucash_mobile/core/models/account.dart';
+import 'package:gnucash_mobile/core/models/account_node.dart';
 
 part 'accounts.g.dart';
 
@@ -25,53 +24,30 @@ Future<void> initAccounts() async {
   _accountCSV = await file.readAsString();
 }
 
+// TODO: Migrate data collection to SharedPreferences
 /// Stores and exposes the accounts.
 @Riverpod(keepAlive: true)
 class Accounts extends _$Accounts {
   @override
-  List<Account> build() {
+  List<AccountNode> build() {
     return _getCachedAccounts();
   }
 
-  List<Account> _getCachedAccounts() {
-    // Using _accountCSV.
-    // TODO: Migrate data collection to SharedPreferences
-
-    // Convert CSV to List<List<String>>
-    const detector = FirstOccurrenceSettingsDetector(
-      eols: ['\r\n', '\n'],
-    );
-    const converter = CsvToListConverter(
-      csvSettingsDetector: detector,
-      textDelimiter: '"',
-      shouldParseNumbers: false,
-    );
-    List<List<String>> parsedCSV = converter.convert(_accountCSV.trim());
-    if (parsedCSV.isEmpty) {
-      return [];
-    }
-    parsedCSV.removeAt(0); // Remove header
-
-    // Convert List<List<String>> to List<Account>
-    List<Account> accounts =
-        parsedCSV.map((csvLine) => Account.fromCSVLine(csvLine)).toList();
-
-    Map<String, Account> lookup = {};
-    List<Account> hierarchicalAccounts = [];
+  List<AccountNode> _getCachedAccounts() {
+    List<Account> accounts = parseAccountCSV(_accountCSV);
+    Map<String, AccountNode> lookup = {};
 
     // Build hierarchical accounts
-    // ToDo: Refactor
     for (Account account in accounts) {
-      if (lookup.containsKey(account.parentFullName)) {
-        Account parent = lookup[account.parentFullName]!;
-        //TODO: This might throw if children list is unmodifiable.
-        //TODO: Make children list unmodifiable by default and solve this differently.
-        parent.children.add(account);
+      lookup[account.fullName] = AccountNode(account: account, children: []);
+    }
+    List<AccountNode> hierarchicalAccounts = [];
+    for (Account account in accounts) {
+      if (account.hasParent()) {
+        lookup[account.parentFullName]!.children.add(lookup[account.fullName]!);
       } else {
-        hierarchicalAccounts.add(account);
+        hierarchicalAccounts.add(lookup[account.fullName]!);
       }
-
-      lookup[account.fullName] = account;
     }
     return List.unmodifiable(hierarchicalAccounts);
   }
@@ -95,14 +71,14 @@ class Accounts extends _$Accounts {
 
 @riverpod
 List<Account> validTransactionAccounts(ValidTransactionAccountsRef ref) {
-  Queue<Account> accounts = Queue()..addAll(ref.watch(accountsProvider));
+  Queue<AccountNode> accounts = Queue()..addAll(ref.watch(accountsProvider));
   List<Account> validAccounts = [];
   while (accounts.isNotEmpty) {
-    Account account = accounts.removeFirst();
-    if (!account.hidden && !account.placeholder) {
-      validAccounts.add(account);
+    AccountNode accountNode = accounts.removeFirst();
+    accounts.addAll(accountNode.children);
+    if (!accountNode.account.placeholder) {
+      validAccounts.add(accountNode.account);
     }
-    accounts.addAll(account.children);
   }
   return validAccounts;
 }
