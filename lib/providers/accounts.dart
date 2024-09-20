@@ -20,7 +20,7 @@ Future<void> initAccounts() async {
   /// TODO: Using applicationSupportDirectory is discouraged for userData, migrate to SharedPreferences
   Directory directory = await getApplicationSupportDirectory();
   File file = File('${directory.path}/accounts.csv');
-  if (!file.existsSync()) {
+  if (!(await file.exists())) {
     _accountCSV = "";
     return;
   }

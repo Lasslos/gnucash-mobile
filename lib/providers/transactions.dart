@@ -15,7 +15,7 @@ Future<void> initTransactions() async {
   /// TODO: Using applicationSupportDirectory is discouraged for userData, migrate to SharedPreferences
   Directory directory = await getApplicationSupportDirectory();
   File file = File('${directory.path}/transactions.csv');
-  if (!file.existsSync()) {
+  if (!(await file.exists())) {
     _transactionCSV = "";
     return;
   }

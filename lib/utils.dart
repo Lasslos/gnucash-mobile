@@ -1,1 +1,1 @@
-export 'package:gnucash_mobile/utils/shared_preferences.dart';
+export 'package:gnucash_mobile/util/shared_preferences.dart';
