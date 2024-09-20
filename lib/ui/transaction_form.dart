@@ -6,6 +6,7 @@ import 'package:gnucash_mobile/core/models/transaction.dart';
 import 'package:gnucash_mobile/core/providers/accounts.dart';
 import 'package:gnucash_mobile/core/providers/transactions.dart';
 import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 
 class TransactionForm extends ConsumerStatefulWidget {
   final Account? toAccount;
@@ -256,7 +257,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           if (_key.currentState!.validate()) {
             // Process data.
             _key.currentState!.save();
-            final id = UniqueKey().toString();
+            final id = const Uuid().v4();
             _transactions[0] = _transactions[0].copyWith(id: id);
             _transactions[1] = _transactions[1].copyWith(id: id);
             assert(creditAccount != null, "credit account must not be null");

@@ -63,10 +63,10 @@ List<String> transactionToCSV(Account account, Transaction transaction) {
     "", // Memo
     account.fullName, // Full Account Name
     account.name, // Account Name
-    "\"${transaction.amount} ${account.symbol}\"", // Amount With Sym
-    "\"${transaction.amount}\"", // Amount Num.
-    "\"${transaction.amount} ${account.symbol}\"", // Value With Sym
-    "\"${transaction.amount}\"", // Value Num.
+    "${transaction.amount} ${account.symbol}", // Amount With Sym
+    "${transaction.amount}", // Amount Num.
+    "${transaction.amount} ${account.symbol}", // Value With Sym
+    "${transaction.amount}", // Value Num.
     "", // Reconcile
     "", // Reconcile Date
     "", // Rate/Price
