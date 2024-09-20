@@ -44,12 +44,15 @@ class Account with _$Account {
 
     /// `true` if the account should not be used for transactions.
     required bool placeholder,
+
     String? code,
+
     String? description,
 
     /// Color in ----- format. If empty, use #f0ecec.
     /// TODO: Add format and parsing for color.
     @Deprecated("Unfinished feature") String? color,
+
     String? notes,
   }) = _Account;
 
@@ -65,7 +68,7 @@ class Account with _$Account {
 
 /// Parse a CSV string into a list of accounts.
 ///
-/// Throws
+/// Throws an [AccountParsingException] if an error occurs.
 List<Account> parseAccountCSV(String csvString) {
   const detector = FirstOccurrenceSettingsDetector(
     eols: ['\r\n', '\n'],

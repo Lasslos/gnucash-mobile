@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gnucash_mobile/core/models/account.dart';
 import 'package:gnucash_mobile/core/models/transaction.dart';
+import 'package:gnucash_mobile/core/providers/transactions.dart';
 import 'package:intl/intl.dart';
 
-class TransactionsView extends StatelessWidget {
-  final List<Transaction> transactions;
+class TransactionsView extends ConsumerWidget {
+  final Account account;
 
-  const TransactionsView({required this.transactions, super.key});
+  const TransactionsView({required this.account, super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final List<Transaction> transactions = ref.watch(
+      transactionsProvider(account),
+    );
+
     final _simpleCurrencyNumberFormat = NumberFormat.simpleCurrency(
       locale: Localizations.localeOf(context).toString(),
     );
@@ -20,16 +27,16 @@ class TransactionsView extends StatelessWidget {
         }
 
         final int i = index ~/ 2;
-        if (i >= this.transactions.length) {
+        if (i >= transactions.length) {
           return null;
         }
 
-        final _transaction = this.transactions[i];
+        final _transaction = transactions[i];
         final _simpleCurrencyValue =
             _simpleCurrencyNumberFormat.format(_transaction.amount);
         return Dismissible(
           background: Container(color: Colors.red),
-          key: Key(_transaction.description + _transaction.fullAccountName),
+          key: Key(_transaction.description + account.fullName),
           onDismissed: (direction) async {
             transactions.remove(_transaction);
             ScaffoldMessenger.of(context).showSnackBar(
@@ -52,7 +59,7 @@ class TransactionsView extends StatelessWidget {
     );
 
     return Container(
-      child: this.transactions.isNotEmpty
+      child: transactions.isNotEmpty
           ? _transactionsBuilder
           : const Center(child: Text("No transactions.")),
     );

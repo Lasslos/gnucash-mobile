@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:gnucash_mobile/core/models/account.dart';
+import 'package:intl/intl.dart';
 
 part 'transaction.freezed.dart';
 part 'transaction.g.dart';
@@ -7,91 +9,67 @@ part 'transaction.g.dart';
 @freezed
 class Transaction with _$Transaction {
   const factory Transaction({
-    required String date,
+    /// The date of the transaction.
+    required DateTime date,
+
+    /// The identifier of the transaction.
+    ///
+    /// This identifier is used for both entries in the double-entry system.
     required String id,
-    required int? number,
+
     required String description,
+
     required String notes,
+
+    /// The type of commodity and currency used in the transaction.
+    ///
+    /// Example: `CURRENCY::EUR`, `CURRENCY::USD`, `CURRENCY::GBP`
     required String commodityCurrency,
-    required String voidReason,
-    required String action,
-    required String memo,
-    required String fullAccountName,
-    required String accountName,
-    required String amountWithSymbol,
-    required double? amount,
-    required String reconcile,
-    required String reconcileDate,
-    required int? ratePrice,
+
+    required double amount,
   }) = _Transaction;
 
   const Transaction._();
 
   static Transaction empty() {
-    return const Transaction(
-      date: "",
+    return Transaction(
+      date: DateTime.now(),
       id: "",
-      number: null,
       description: "",
       notes: "",
       commodityCurrency: "",
-      voidReason: "",
-      action: "",
-      memo: "",
-      fullAccountName: "",
-      accountName: "",
-      amountWithSymbol: "",
-      amount: null,
-      reconcile: "",
-      reconcileDate: "",
-      ratePrice: null,
+      amount: 0.0,
     );
-  }
-
-  factory Transaction.fromCSVLine(List<String> items) {
-    items = items.map((item) => item.trim()).toList();
-
-    return Transaction(
-      date: items[0],
-      id: items[1],
-      number: int.tryParse(items[2]) ?? null,
-      description: items[3],
-      notes: items[4],
-      commodityCurrency: items[5],
-      voidReason: items[6],
-      action: items[7],
-      memo: items[8],
-      fullAccountName: items[9],
-      accountName: items[10],
-      amountWithSymbol: items[11],
-      amount: double.tryParse(items[12]) ?? null,
-      reconcile: items[13],
-      reconcileDate: items[14],
-      ratePrice: int.tryParse(items[15]) ?? null,
-    );
-  }
-
-  List<dynamic> toCSVLine() {
-    return [
-      date,
-      id,
-      number ?? "",
-      description,
-      notes,
-      commodityCurrency,
-      voidReason,
-      action,
-      memo,
-      fullAccountName,
-      accountName,
-      amountWithSymbol,
-      amount ?? "",
-      reconcile,
-      reconcileDate,
-      ratePrice ?? "",
-    ];
   }
 
   factory Transaction.fromJson(Map<String, dynamic> json) =>
       _$TransactionFromJson(json);
 }
+
+/// Converts a transaction to a CSV row.
+///
+/// The rows are formatted as follows:
+/// Date,Transaction ID,Number,Description,Notes,Commodity/Currency,Void Reason,Action,Memo,Full Account Name,Account Name,Amount With Sym,Amount Num.,Value With Sym,Value Num.,Reconcile,Reconcile Date,Rate/Price
+List<String> transactionToCSV(Account account, Transaction transaction) {
+  return [
+    DateFormat('yyyy-MM-dd').format(transaction.date), // Date
+    transaction.id, // Transaction ID
+    "", // Number
+    transaction.description, // Description
+    transaction.notes, // Notes
+    transaction.commodityCurrency, // Commodity/Currency
+    "", // Void Reason
+    "", // Action
+    "", // Memo
+    account.fullName, // Full Account Name
+    account.name, // Account Name
+    "\"${transaction.amount} ${account.symbol}\"", // Amount With Sym
+    "\"${transaction.amount}\"", // Amount Num.
+    "\"${transaction.amount} ${account.symbol}\"", // Value With Sym
+    "\"${transaction.amount}\"", // Value Num.
+    "", // Reconcile
+    "", // Reconcile Date
+    "", // Rate/Price
+  ];
+}
+

@@ -1,10 +1,10 @@
 import 'dart:io';
 
-// The commented code in this file is for choosing a directory to export to.
-// This works on Android, but on iOS we can't write a file to external storage.
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gnucash_mobile/core/models/account.dart';
+import 'package:gnucash_mobile/core/providers/accounts.dart';
 import 'package:gnucash_mobile/core/providers/transactions.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -47,7 +47,7 @@ class _ExportState extends ConsumerState<Export> {
 
   @override
   Widget build(BuildContext context) {
-    String transactionCSV = ref.watch(transactionsProvider.notifier).getCSV();
+    String transactionCSV = ref.watch(transactionsCSVProvider);
     // Remove 1 for header row, divide by 2 for double entry
     final _numTransactions = ("\n".allMatches(transactionCSV).length - 1) / 2;
     String _text = "${_numTransactions.toInt()} transaction(s)";
@@ -100,7 +100,9 @@ class _ExportState extends ConsumerState<Export> {
                   await File(_fileName).writeAsString(transactionCSV);
 
                   if (deleteTransactionsOnExport) {
-                    ref.read(transactionsProvider.notifier).removeAll();
+                    for (Account account in ref.read(allAccountsProvider)) {
+                      ref.read(transactionsProvider(account).notifier).removeAll();
+                    }
                   }
 
                   Navigator.pop(context, true);

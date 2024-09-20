@@ -20,8 +20,6 @@ import 'package:intl/number_symbols_data.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initSharedPreferences();
-  await initTransactions();
-  await initAccounts();
   runApp(
     const ProviderScope(
       child: MyApp(),
@@ -72,10 +70,14 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    List<AccountNode> accountNodes = ref.watch(accountsProvider);
+    List<AccountNode> accountNodes = ref.watch(rootAccountNodesProvider);
     bool hasImported = accountNodes.isNotEmpty;
 
-    List<Transaction> transactions = ref.watch(transactionsProvider);
+    List<Account> accounts = ref.watch(allAccountsProvider);
+    List<Transaction> allTransactions = [];
+    for (Account account in accounts) {
+      allTransactions += ref.watch(transactionsProvider(account));
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -119,7 +121,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                 try {
                   final _file = File(result.files.single.path!);
                   String contents = await _file.readAsString();
-                  ref.read(accountsProvider.notifier).setAccounts(contents);
+                  ref.read(rootAccountNodesProvider.notifier).setCSV(contents);
                   Navigator.pop(context);
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -169,7 +171,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                 _showConfirm(
                     context, 'Are you sure you want to delete accounts?',
                     () async {
-                  await ref.read(accountsProvider.notifier).clearAccounts();
+                  await ref.read(rootAccountNodesProvider.notifier).clear();
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Accounts deleted.")),
@@ -181,10 +183,10 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
             ),
             ListTile(
               title: Text(
-                'Delete ${transactions.length ~/ 2} Transaction(s)',
+                'Delete ${allTransactions.length ~/ 2} Transaction(s)',
               ),
               onTap: () {
-                if (transactions.isEmpty) {
+                if (allTransactions.isEmpty) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -196,7 +198,9 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                 _showConfirm(
                     context, 'Are you sure you want to delete transactions?',
                     () {
-                  ref.read(transactionsProvider.notifier).removeAll();
+                  for (Account account in accounts) {
+                    ref.read(transactionsProvider(account).notifier).removeAll();
+                  }
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(

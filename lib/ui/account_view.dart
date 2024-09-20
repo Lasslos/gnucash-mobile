@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gnucash_mobile/core/models/account_node.dart';
-import 'package:gnucash_mobile/core/models/transaction.dart';
-import 'package:gnucash_mobile/core/providers/transactions.dart';
 import 'package:gnucash_mobile/ui/list_of_accounts.dart';
 import 'package:gnucash_mobile/ui/transaction_form.dart';
 import 'package:gnucash_mobile/ui/transactions_view.dart';
@@ -14,8 +12,6 @@ class AccountView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Map<String, List<Transaction>> transactionsByAccountFullName =
-        ref.watch(transactionsByAccountFullNameProvider);
     // Deliver simpler view if this account cannot hold transactions
     if (this.accountNode.account.placeholder) {
       return Scaffold(
@@ -64,8 +60,7 @@ class AccountView extends ConsumerWidget {
           children: [
             ListOfAccounts(accountNodes: accountNode.children),
             TransactionsView(
-              transactions:
-                  transactionsByAccountFullName[this.accountNode.account.fullName] ?? [],
+              account: accountNode.account,
             ),
           ],
         ),

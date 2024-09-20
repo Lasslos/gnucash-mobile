@@ -29,6 +29,8 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
 
   // Credit account, debit account
   final _transactions = [Transaction.empty(), Transaction.empty()];
+  Account? debitAccount;
+  Account? creditAccount;
 
   @override
   void dispose() {
@@ -83,11 +85,9 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                   final _amount = _simpleCurrencyNumberFormat.parse(value);
                   _transactions[0] = _transactions[0].copyWith(
                     amount: _amount.toDouble(),
-                    amountWithSymbol: value,
                   );
                   _transactions[1] = _transactions[1].copyWith(
                     amount: -_amount.toDouble(),
-                    amountWithSymbol: "-" + value,
                   );
                 },
                 textInputAction: TextInputAction.next,
@@ -154,10 +154,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                 if (value == null) {
                   return;
                 }
-                _transactions[0] = _transactions[0].copyWith(
-                  fullAccountName: value.fullName,
-                  accountName: value.name,
-                );
+                creditAccount = value;
               },
               validator: (value) {
                 if (value == null) {
@@ -187,10 +184,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                 if (value == null) {
                   return;
                 }
-                _transactions[1] = _transactions[1].copyWith(
-                  fullAccountName: value.fullName,
-                  accountName: value.name,
-                );
+                debitAccount = value;
               },
               validator: (value) {
                 if (value == null) {
@@ -212,8 +206,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                   return;
                 }
                 _transactions[0] = _transactions[0].copyWith(
-                  date: DateFormat('yyyy-MM-dd')
-                      .format(DateFormat.yMd().parse(value)),
+                  date: DateTime.parse(value),
                 );
               },
               onTap: () async {
@@ -268,11 +261,17 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           if (_key.currentState!.validate()) {
             // Process data.
             _key.currentState!.save();
-
             final id = UniqueKey().toString();
             _transactions[0] = _transactions[0].copyWith(id: id);
             _transactions[1] = _transactions[1].copyWith(id: id);
-            ref.read(transactionsProvider.notifier).addAll(_transactions);
+            assert(creditAccount != null, "credit account must not be null");
+            assert(debitAccount != null, "debit account must not be null");
+            ref.read(transactionsProvider(creditAccount!).notifier).add(
+                  _transactions[0],
+                );
+            ref.read(transactionsProvider(debitAccount!).notifier).add(
+                  _transactions[1],
+                );
             Navigator.pop(context, true);
           } else {
             print("invalid form");

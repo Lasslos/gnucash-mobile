@@ -1,98 +1,99 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:csv/csv.dart';
-import 'package:csv/csv_settings_autodetection.dart';
+import 'package:gnucash_mobile/core/models/account.dart';
 import 'package:gnucash_mobile/core/models/transaction.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:gnucash_mobile/core/providers/accounts.dart';
+import 'package:gnucash_mobile/utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'transactions.g.dart';
 
-late String _transactionCSV;
-Future<void> initTransactions() async {
-  /// TODO: Using applicationSupportDirectory is discouraged for userData, migrate to SharedPreferences
-  Directory directory = await getApplicationSupportDirectory();
-  File file = File('${directory.path}/transactions.csv');
-  if (!(await file.exists())) {
-    _transactionCSV = "";
-    return;
-  }
-  _transactionCSV = await file.readAsString();
-}
-
-@riverpod
+@Riverpod(keepAlive: true)
 class Transactions extends _$Transactions {
   @override
-  List<Transaction> build() {
-    return _getCachedTransactions();
+  List<Transaction> build(Account account) {
+    ref.listenSelf((previous, next) {
+      if (previous != next) {
+        _setCached();
+      }
+    });
+    return _getCached();
   }
 
-  List<Transaction> _getCachedTransactions() {
-    // Using _accountCSV.
-    // TODO: Migrate data collection to SharedPreferences
-
-    // Convert CSV to List<List<String>>
-    const detector = FirstOccurrenceSettingsDetector(
-      eols: ['\r\n', '\n'],
-    );
-    const converter = CsvToListConverter(
-      csvSettingsDetector: detector,
-      textDelimiter: '"',
-      shouldParseNumbers: false,
-    );
-
-    List<List<String>> parsedCSV = converter.convert(_transactionCSV.trim());
-
-    // Convert List<List<String>> to List<Transaction>
+  List<Transaction> _getCached() {
+    String? json = sharedPreferences.getString('transactions.account.$account');
+    if (json == null) {
+      return [];
+    }
+    List<dynamic> transactions = jsonDecode(json);
     return List.unmodifiable(
-      parsedCSV.map((line) => Transaction.fromCSVLine(line)).toList(),
+      transactions.map((transaction) => Transaction.fromJson(transaction)).toList(),
+    );
+  }
+  void _setCached() async {
+    sharedPreferences.setString(
+      'transactions.account.$account',
+      jsonEncode(
+        state.map((transaction) => transaction.toJson()).toList(),
+      ),
     );
   }
 
-  void _setCachedTransactions() async {
-    Directory directory = await getApplicationSupportDirectory();
-    File file = File('${directory.path}/transactions.csv');
-    String csvString = const ListToCsvConverter(eol: "\n")
-        .convert(state.map((transaction) => transaction.toCSVLine()).toList());
-    await file.writeAsString(csvString);
+  void add(Transaction transaction) {
+    state = List.unmodifiable([...state, transaction]);
   }
 
   void addAll(List<Transaction> transactions) {
     state = List.unmodifiable([...state, ...transactions]);
-    _setCachedTransactions();
   }
 
   void removeAll() {
     state = List.unmodifiable([]);
-    _setCachedTransactions();
   }
 
   void remove(Transaction transaction) {
     state = List.unmodifiable([...state]..remove(transaction));
-    _setCachedTransactions();
-  }
-
-  String getCSV() {
-    String content = const ListToCsvConverter(eol: "\n")
-        .convert(state.map((transaction) => transaction.toCSVLine()).toList());
-    return "Date,Transaction ID,Number,Description,Notes,Commodity/Currency,Void Reason,Action,Memo,Full Account Name,Account Name,Amount With Sym.,Amount Num,Reconcile,Reconcile Date,Rate/Price\n$content";
   }
 }
 
-@riverpod
-Map<String, List<Transaction>> transactionsByAccountFullName(
-  TransactionsByAccountFullNameRef ref,
-) {
-  final transactions = ref.watch(transactionsProvider);
-  final Map<String, List<Transaction>> transactionsByAccountFullName = {};
+const csvHeader = [
+  "Date",
+  "Transaction ID",
+  "Number",
+  "Description",
+  "Notes",
+  "Commodity/Currency",
+  "Void Reason",
+  "Action",
+  "Memo",
+  "Full Account Name",
+  "Account Name",
+  "Amount With Sym",
+  "Amount Num.",
+  "Value With Sym",
+  "Value Num.",
+  "Reconcile",
+  "Reconcile Date",
+  "Rate/Price",
+];
 
-  for (var transaction in transactions) {
-    transactionsByAccountFullName.putIfAbsent(
-      transaction.fullAccountName,
-      () => [],
-    );
-    transactionsByAccountFullName[transaction.fullAccountName]!
-        .add(transaction);
+@riverpod
+String transactionsCSV(TransactionsCSVRef ref) {
+  List<List<String>> csv = []
+    ..add(csvHeader);
+
+  List<MapEntry<Account, Transaction>> transactions = [];
+  List<Account> accounts = ref.watch(allAccountsProvider);
+  // Iterate over all accounts and collect the transactions
+  for (Account account in accounts) {
+    List<Transaction> currentTransactions = ref.watch(transactionsProvider(account));
+    transactions.addAll(currentTransactions.map((transaction) => MapEntry(account, transaction)));
   }
-  return transactionsByAccountFullName;
+
+  for (MapEntry<Account, Transaction> pair in transactions) {
+    csv.add(transactionToCSV(pair.key, pair.value));
+  }
+
+  return const ListToCsvConverter(eol: "\n").convert(csv);
 }

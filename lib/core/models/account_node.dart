@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:gnucash_mobile/core/models/account.dart';
 
 part 'account_node.freezed.dart';
+part 'account_node.g.dart';
 
 /// An account and its potential children.
 @Freezed(makeCollectionsUnmodifiable: false)
@@ -13,4 +14,6 @@ class AccountNode with _$AccountNode {
   }) = _AccountNode;
 
   const AccountNode._();
+
+  factory AccountNode.fromJson(Map<String, dynamic> json) => _$AccountNodeFromJson(json);
 }

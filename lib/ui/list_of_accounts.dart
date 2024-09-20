@@ -19,9 +19,6 @@ class ListOfAccounts extends ConsumerWidget {
       locale: Localizations.localeOf(context).toString(),
     );
 
-    Map<String, List<Transaction>> transactionsByAccountFullName =
-        ref.watch(transactionsByAccountFullNameProvider);
-
     return ListView.builder(
       itemBuilder: (context, index) {
         if (index.isOdd) {
@@ -36,17 +33,12 @@ class ListOfAccounts extends ConsumerWidget {
         final _accountNode = accountNodes[i];
         final _account = _accountNode.account;
 
-        final List<Transaction> _transactions = [];
-        for (var key in transactionsByAccountFullName.keys) {
-          if (key.startsWith(_account.fullName)) {
-            _transactions.addAll(
-              transactionsByAccountFullName[key] ?? [],
-            );
-          }
-        }
+        final List<Transaction> _transactions = ref.watch(
+          transactionsProvider(_account),
+        );
         final double _balance = _transactions.fold(
           0.0,
-          (previousValue, element) => previousValue + element.amount!,
+          (previousValue, element) => previousValue + element.amount,
         );
         final _simpleCurrencyValue =
             _simpleCurrencyNumberFormat.format(_balance);
@@ -70,9 +62,7 @@ class ListOfAccounts extends ConsumerWidget {
                         title: Text(_account.fullName),
                       ),
                       body: TransactionsView(
-                        transactions:
-                            transactionsByAccountFullName[_account.fullName] ??
-                                [],
+                        account:_account,
                       ),
                       floatingActionButton: Builder(
                         builder: (context) {

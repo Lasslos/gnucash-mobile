@@ -1,40 +1,49 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:core';
-import 'dart:io';
 
-import 'package:gnucash_mobile/utils.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:gnucash_mobile/core/models/account.dart';
 import 'package:gnucash_mobile/core/models/account_node.dart';
+import 'package:gnucash_mobile/utils.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'accounts.g.dart';
 
-late String _accountCSV;
-
-Future<void> initAccounts() async {
-  /// TODO: Using applicationSupportDirectory is discouraged for userData, migrate to SharedPreferences
-  Directory directory = await getApplicationSupportDirectory();
-  File file = File('${directory.path}/accounts.csv');
-  if (!(await file.exists())) {
-    _accountCSV = "";
-    return;
-  }
-  _accountCSV = await file.readAsString();
-}
-
-// TODO: Migrate data collection to SharedPreferences
 /// Stores and exposes the accounts.
 @Riverpod(keepAlive: true)
-class Accounts extends _$Accounts {
+class RootAccountNodes extends _$RootAccountNodes {
   @override
   List<AccountNode> build() {
-    return _getCachedAccounts();
+    ref.listenSelf((previous, next) {
+      if (previous != next) {
+        _setCached();
+      }
+    });
+    return _getCached();
   }
 
-  List<AccountNode> _getCachedAccounts() {
-    List<Account> accounts = parseAccountCSV(_accountCSV);
+  List<AccountNode> _getCached() {
+    String? json = sharedPreferences.getString('accounts');
+    if (json == null) {
+      return [];
+    }
+    List<dynamic> accounts = jsonDecode(json);
+    return List.unmodifiable(
+      accounts.map((account) => AccountNode.fromJson(account)).toList(),
+    );
+  }
+
+  void _setCached() {
+    sharedPreferences.setString(
+      'accounts',
+      jsonEncode(
+        state.map((accountNode) => accountNode.account.toJson()).toList(),
+      ),
+    );
+  }
+
+  Future<void> setCSV(String csv) async {
+    List<Account> accounts = parseAccountCSV(csv);
     Map<String, AccountNode> lookup = {};
 
     // Build hierarchical accounts
@@ -49,29 +58,30 @@ class Accounts extends _$Accounts {
         hierarchicalAccounts.add(lookup[account.fullName]!);
       }
     }
-    return List.unmodifiable(hierarchicalAccounts);
+
+    state = List.unmodifiable(hierarchicalAccounts);
   }
 
-  Future<void> setAccounts(String csv) async {
-    _accountCSV = csv;
-    Directory directory = await getApplicationSupportDirectory();
-    File file = File('${directory.path}/accounts.csv');
-    await file.writeAsString(csv);
-    state = _getCachedAccounts();
-  }
-
-  Future<void> clearAccounts() async {
-    _accountCSV = "";
-    Directory directory = await getApplicationSupportDirectory();
-    File file = File('${directory.path}/accounts.csv');
-    await file.writeAsString("");
+  Future<void> clear() async {
     state = List.unmodifiable([]);
   }
 }
 
 @riverpod
+List<Account> allAccounts(AllAccountsRef ref) {
+  Queue<AccountNode> accounts = Queue()..addAll(ref.watch(rootAccountNodesProvider));
+  List<Account> allAccounts = [];
+  while (accounts.isNotEmpty) {
+    AccountNode accountNode = accounts.removeFirst();
+    accounts.addAll(accountNode.children);
+    allAccounts.add(accountNode.account);
+  }
+  return allAccounts;
+}
+
+@riverpod
 List<Account> validTransactionAccounts(ValidTransactionAccountsRef ref) {
-  Queue<AccountNode> accounts = Queue()..addAll(ref.watch(accountsProvider));
+  Queue<AccountNode> accounts = Queue()..addAll(ref.watch(rootAccountNodesProvider));
   List<Account> validAccounts = [];
   while (accounts.isNotEmpty) {
     AccountNode accountNode = accounts.removeFirst();

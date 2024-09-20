@@ -20,7 +20,7 @@ class Intro extends ConsumerWidget {
           try {
             final _file = File(result.files.single.path!);
             String contents = await _file.readAsString();
-            ref.read(accountsProvider.notifier).setAccounts(contents);
+            ref.read(rootAccountNodesProvider.notifier).setCSV(contents);
           } catch (e) {
             print(e);
             ScaffoldMessenger.of(context).showSnackBar(
