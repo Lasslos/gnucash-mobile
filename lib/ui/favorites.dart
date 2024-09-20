@@ -1,8 +1,8 @@
 import 'package:dart_extensions_methods/dart_extension_methods.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gnucash_mobile/providers/accounts.dart';
-
+import 'package:gnucash_mobile/core/models/account.dart';
+import 'package:gnucash_mobile/core/providers/accounts.dart';
 
 class Favorites extends ConsumerWidget {
   const Favorites({super.key});
@@ -51,13 +51,17 @@ class Favorites extends ConsumerWidget {
                 hint: const Text("Favorite Credit Account"),
                 isExpanded: true,
                 // TODO: Put recently used first
-                items: validTransactionAccounts.map((account) => DropdownMenuItem(
-                    value: account,
-                    child: Text(
-                      account.fullName,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  )).toList(),
+                items: validTransactionAccounts
+                    .map(
+                      (account) => DropdownMenuItem(
+                        value: account,
+                        child: Text(
+                          account.fullName,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    )
+                    .toList(),
                 onChanged: (value) {
                   if (value != null) {
                     ref.read(favoriteCreditAccountProvider.notifier).set(value);

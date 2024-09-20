@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gnucash_mobile/providers/accounts.dart';
-import 'package:gnucash_mobile/providers/transactions.dart';
-import 'package:gnucash_mobile/widgets/account_view.dart';
-import 'package:gnucash_mobile/widgets/transaction_form.dart';
-import 'package:gnucash_mobile/widgets/transactions_view.dart';
+import 'package:gnucash_mobile/core/models/account.dart';
+import 'package:gnucash_mobile/core/models/transaction.dart';
+import 'package:gnucash_mobile/core/providers/transactions.dart';
+import 'package:gnucash_mobile/ui/account_view.dart';
+import 'package:gnucash_mobile/ui/transaction_form.dart';
+import 'package:gnucash_mobile/ui/transactions_view.dart';
 import 'package:intl/intl.dart';
 
 class ListOfAccounts extends ConsumerWidget {

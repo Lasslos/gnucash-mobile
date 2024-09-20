@@ -4,15 +4,16 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gnucash_mobile/constants.dart';
-import 'package:gnucash_mobile/providers/accounts.dart';
-import 'package:gnucash_mobile/providers/transactions.dart';
+import 'package:gnucash_mobile/core/models/account.dart';
+import 'package:gnucash_mobile/core/models/transaction.dart';
+import 'package:gnucash_mobile/core/providers/accounts.dart';
+import 'package:gnucash_mobile/core/providers/transactions.dart';
 import 'package:gnucash_mobile/utils.dart';
-import 'package:gnucash_mobile/widgets/export.dart';
-import 'package:gnucash_mobile/widgets/favorites.dart';
-import 'package:gnucash_mobile/widgets/intro.dart';
-import 'package:gnucash_mobile/widgets/list_of_accounts.dart';
-import 'package:gnucash_mobile/widgets/transaction_form.dart';
+import 'package:gnucash_mobile/ui/export.dart';
+import 'package:gnucash_mobile/ui/favorites.dart';
+import 'package:gnucash_mobile/ui/intro.dart';
+import 'package:gnucash_mobile/ui/list_of_accounts.dart';
+import 'package:gnucash_mobile/ui/transaction_form.dart';
 import 'package:intl/number_symbols_data.dart';
 
 void main() async {
@@ -33,9 +34,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: appName,
-      theme: lightTheme,
-      darkTheme: darkTheme,
+      title: "GnuCash Mobile",
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        brightness: Brightness.light,
+      ),
+      darkTheme: ThemeData(
+        primarySwatch: Colors.blue,
+        brightness: Brightness.dark,
+      ),
       themeMode: ThemeMode.system,
       home: const MyHomePage(),
       supportedLocales: numberFormatSymbols.keys
