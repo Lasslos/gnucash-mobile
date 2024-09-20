@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gnucash_mobile/core/models/account_node.dart';
@@ -33,9 +35,22 @@ class ListOfAccounts extends ConsumerWidget {
         final _accountNode = accountNodes[i];
         final _account = _accountNode.account;
 
-        final List<Transaction> _transactions = ref.watch(
-          transactionsProvider(_account),
-        );
+        final List<Transaction> _transactions = [
+          ...ref.watch(
+            transactionsProvider(_account),
+          ),
+        ];
+        Queue<AccountNode> queue = Queue()..addAll(_accountNode.children);
+        while (queue.isNotEmpty) {
+          final _node = queue.removeFirst();
+          _transactions.addAll(
+            ref.watch(
+              transactionsProvider(_node.account),
+            ),
+          );
+          queue.addAll(_node.children);
+        }
+
         final double _balance = _transactions.fold(
           0.0,
           (previousValue, element) => previousValue + element.amount,
@@ -62,7 +77,7 @@ class ListOfAccounts extends ConsumerWidget {
                         title: Text(_account.fullName),
                       ),
                       body: TransactionsView(
-                        account:_account,
+                        account: _account,
                       ),
                       floatingActionButton: Builder(
                         builder: (context) {

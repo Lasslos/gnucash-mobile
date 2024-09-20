@@ -37,7 +37,7 @@ class RootAccountNodes extends _$RootAccountNodes {
     sharedPreferences.setString(
       'accounts',
       jsonEncode(
-        state.map((accountNode) => accountNode.account.toJson()).toList(),
+        state.map((accountNode) => accountNode.toJson()).toList(),
       ),
     );
   }

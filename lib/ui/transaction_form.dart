@@ -201,14 +201,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                 hintText: 'Date',
               ),
               controller: _dateInputController,
-              onSaved: (value) {
-                if (value == null) {
-                  return;
-                }
-                _transactions[0] = _transactions[0].copyWith(
-                  date: DateTime.parse(value),
-                );
-              },
+              readOnly: true,
               onTap: () async {
                 final _now = DateTime.now();
                 final _date = await showDatePicker(
@@ -221,6 +214,8 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                   return;
                 }
                 _dateInputController.text = DateFormat.yMd().format(_date);
+                _transactions[0] = _transactions[0].copyWith(date: _date);
+                _transactions[1] = _transactions[1].copyWith(date: _date);
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
