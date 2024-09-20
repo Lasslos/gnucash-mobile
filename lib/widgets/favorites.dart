@@ -1,3 +1,4 @@
+import 'package:dart_extensions_methods/dart_extension_methods.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
@@ -41,7 +42,7 @@ class Favorites extends ConsumerWidget {
                     ref.read(favoriteDebitAccountProvider.notifier).set(value);
                   }
                 },
-                value: validTransactionAccounts.firstWhere(
+                value: validTransactionAccounts.firstWhereOrNull(
                   (account) =>
                       account.fullName == favoriteDebitAccount?.fullName,
                 ),
@@ -50,21 +51,19 @@ class Favorites extends ConsumerWidget {
                 hint: const Text("Favorite Credit Account"),
                 isExpanded: true,
                 // TODO: Put recently used first
-                items: validTransactionAccounts.map((account) {
-                  return DropdownMenuItem(
+                items: validTransactionAccounts.map((account) => DropdownMenuItem(
                     value: account,
                     child: Text(
                       account.fullName,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  );
-                }).toList(),
+                  )).toList(),
                 onChanged: (value) {
                   if (value != null) {
                     ref.read(favoriteCreditAccountProvider.notifier).set(value);
                   }
                 },
-                value: validTransactionAccounts.firstWhere(
+                value: validTransactionAccounts.firstWhereOrNull(
                   (account) =>
                       account.fullName == favoriteCreditAccount?.fullName,
                 ),

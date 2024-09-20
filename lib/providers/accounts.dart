@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
@@ -153,10 +154,17 @@ class Accounts extends _$Accounts {
 
 @riverpod
 List<Account> validTransactionAccounts(ValidTransactionAccountsRef ref) {
-  return ref
-      .watch(accountsProvider)
-      .where((account) => !account.placeholder)
-      .toList();
+  Queue<Account> accounts = Queue()
+    ..addAll(ref.watch(accountsProvider));
+  List<Account> validAccounts = [];
+  while (accounts.isNotEmpty) {
+    Account account = accounts.removeFirst();
+    if (!account.hidden && !account.placeholder) {
+      validAccounts.add(account);
+    }
+    accounts.addAll(account.children);
+  }
+  return validAccounts;
 }
 
 @riverpod

@@ -17,8 +17,8 @@ class Export extends ConsumerStatefulWidget {
 }
 
 class _ExportState extends ConsumerState<Export> {
-  late String _directoryPath;
-  late String _directory;
+  String _directoryPath = "/";
+  String _directory = "/";
 
   bool deleteTransactionsOnExport = false;
 

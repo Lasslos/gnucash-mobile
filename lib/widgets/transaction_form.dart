@@ -1,3 +1,4 @@
+import 'package:dart_extensions_methods/dart_extension_methods.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
@@ -162,7 +163,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                 }
                 return null;
               },
-              value: validTransactionAccounts.firstWhere(
+              value: validTransactionAccounts.firstWhereOrNull(
                 (account) =>
                     account.fullName == favoriteCreditAccount?.fullName,
               ),
@@ -195,7 +196,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                 }
                 return null;
               },
-              value: validTransactionAccounts.firstWhere(
+              value: validTransactionAccounts.firstWhereOrNull(
                 (account) => account.fullName == favoriteDebitAccount?.fullName,
               ),
             ),
