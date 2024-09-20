@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gnucash_mobile/constants.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 
 class Intro extends ConsumerWidget {
@@ -13,9 +12,6 @@ class Intro extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Center(
       child: TextButton(
-        style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.all<Color>(darkAccent),
-        ),
         onPressed: () async {
           FilePickerResult? result = await FilePicker.platform.pickFiles();
           if (result == null) {
@@ -36,11 +32,8 @@ class Intro extends ConsumerWidget {
             );
           }
         },
-        child: Text(
+        child: const Text(
           "Import",
-          style: TextStyle(
-            color: lightPrimary,
-          ),
         ),
       ),
     );

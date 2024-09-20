@@ -68,7 +68,7 @@ final validTransactionAccountsProvider =
 );
 
 typedef ValidTransactionAccountsRef = AutoDisposeProviderRef<List<Account>>;
-String _$accountsHash() => r'fc02fe4bdb7ec2955ad1320df21b31fed57880d3';
+String _$accountsHash() => r'982c20a5a9377d27eec62113a3a276f22636bf3a';
 
 /// Stores and exposes the accounts.
 ///

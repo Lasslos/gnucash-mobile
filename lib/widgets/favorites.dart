@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 
-import 'package:gnucash_mobile/constants.dart';
 
 class Favorites extends ConsumerWidget {
   const Favorites({super.key});
@@ -16,7 +15,6 @@ class Favorites extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: darkBG,
         title: const Text("Favorites"),
       ),
       body: Padding(
@@ -76,31 +74,19 @@ class Favorites extends ConsumerWidget {
                 color: Colors.transparent,
               ),
               TextButton(
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all<Color>(darkAccent),
-                ),
                 onPressed: () {
                   ref.read(favoriteDebitAccountProvider.notifier).clear();
                 },
-                child: Text(
+                child: const Text(
                   "Clear favorite debit account",
-                  style: TextStyle(
-                    color: lightPrimary,
-                  ),
                 ),
               ),
               TextButton(
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all<Color>(darkAccent),
-                ),
                 onPressed: () {
                   ref.read(favoriteCreditAccountProvider.notifier).clear();
                 },
-                child: Text(
+                child: const Text(
                   "Clear favorite credit account",
-                  style: TextStyle(
-                    color: lightPrimary,
-                  ),
                 ),
               ),
             ],

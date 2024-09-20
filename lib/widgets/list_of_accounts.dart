@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gnucash_mobile/constants.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:gnucash_mobile/providers/transactions.dart';
 import 'package:gnucash_mobile/widgets/account_view.dart';
@@ -52,7 +51,7 @@ class ListOfAccounts extends ConsumerWidget {
         return ListTile(
           title: Text(
             _account.name,
-            style: biggerFont,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           trailing: Text(
             _simpleCurrencyValue,
@@ -65,7 +64,6 @@ class ListOfAccounts extends ConsumerWidget {
                   builder: (context) {
                     return Scaffold(
                       appBar: AppBar(
-                        backgroundColor: darkBG,
                         title: Text(_account.fullName),
                       ),
                       body: TransactionsView(
@@ -76,7 +74,6 @@ class ListOfAccounts extends ConsumerWidget {
                       floatingActionButton: Builder(
                         builder: (context) {
                           return FloatingActionButton(
-                            backgroundColor: darkBG,
                             child: const Icon(Icons.add),
                             onPressed: () async {
                               final _success = await Navigator.push(

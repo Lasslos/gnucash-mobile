@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gnucash_mobile/constants.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:gnucash_mobile/providers/transactions.dart';
 import 'package:gnucash_mobile/widgets/list_of_accounts.dart';
@@ -20,14 +19,12 @@ class AccountView extends ConsumerWidget {
     if (this.account.placeholder) {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: darkBG,
           title: Text(this.account.fullName),
         ),
         body: ListOfAccounts(accounts: this.account.children),
         floatingActionButton: Builder(
           builder: (context) {
             return FloatingActionButton(
-              backgroundColor: darkBG,
               child: const Icon(Icons.add),
               onPressed: () async {
                 final _success = await Navigator.push(
@@ -74,7 +71,6 @@ class AccountView extends ConsumerWidget {
         floatingActionButton: Builder(
           builder: (context) {
             return FloatingActionButton(
-              backgroundColor: darkBG,
               child: const Icon(Icons.add),
               onPressed: () async {
                 final _success = await Navigator.push(

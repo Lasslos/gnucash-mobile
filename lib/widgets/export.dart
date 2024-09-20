@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gnucash_mobile/constants.dart';
 import 'package:gnucash_mobile/providers/transactions.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -72,17 +71,9 @@ class _ExportState extends ConsumerState<Export> {
             Platform.isIOS
                 ? const SizedBox.shrink()
                 : TextButton(
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all<Color>(
-                        darkAccent,
-                      ),
-                    ),
                     onPressed: () => _selectFolder(),
-                    child: Text(
+                    child: const Text(
                       "Pick directory",
-                      style: TextStyle(
-                        color: lightPrimary,
-                      ),
                     ),
                   ),
             CheckboxListTile(
@@ -100,11 +91,6 @@ class _ExportState extends ConsumerState<Export> {
               },
             ),
             TextButton(
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(
-                  darkAccent,
-                ),
-              ),
               onPressed: () async {
                 final _yearMonthDay =
                     DateFormat('yyyyMMdd').format(DateTime.now());
@@ -125,11 +111,8 @@ class _ExportState extends ConsumerState<Export> {
                   );
                 }
               },
-              child: Text(
+              child: const Text(
                 "Export",
-                style: TextStyle(
-                  color: lightPrimary,
-                ),
               ),
             ),
           ],

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gnucash_mobile/constants.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:gnucash_mobile/providers/transactions.dart';
 import 'package:intl/intl.dart';
@@ -48,7 +47,6 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: darkBG,
         title: const Text("New transaction"),
         leading: Builder(
           builder: (context) {
@@ -260,7 +258,6 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
       floatingActionButton:
           // Builder(builder: (context) {
           FloatingActionButton(
-        backgroundColor: darkBG,
         child: const Icon(Icons.save_sharp),
         onPressed: () {
           // Validate will return true if the form is valid, or false if

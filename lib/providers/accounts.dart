@@ -78,6 +78,7 @@ class Account with _$Account {
       tax: line[10] == 'T',
       placeholder: line[11] == 'T',
       parentFullName: parentFullName,
+      children: [],
     );
   }
 }
@@ -103,8 +104,11 @@ class Accounts extends _$Accounts {
       textDelimiter: '"',
       shouldParseNumbers: false,
     );
-    List<List<String>> parsedCSV = converter.convert(_accountCSV.trim())
-      ..removeAt(0); // Remove header row
+    List<List<String>> parsedCSV = converter.convert(_accountCSV.trim());
+    if (parsedCSV.isEmpty) {
+      return [];
+    }
+    parsedCSV.removeAt(0); // Remove header
 
     // Convert List<List<String>> to List<Account>
     List<Account> accounts =
@@ -118,6 +122,8 @@ class Accounts extends _$Accounts {
     for (Account account in accounts) {
       if (lookup.containsKey(account.parentFullName)) {
         Account parent = lookup[account.parentFullName]!;
+        //TODO: This might throw if children list is unmodifiable.
+        //TODO: Make children list unmodifiable by default and solve this differently.
         parent.children.add(account);
       } else {
         hierarchicalAccounts.add(account);

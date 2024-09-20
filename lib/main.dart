@@ -33,10 +33,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: appName,
       theme: lightTheme,
       darkTheme: darkTheme,
+      themeMode: ThemeMode.system,
       home: const MyHomePage(),
       supportedLocales: numberFormatSymbols.keys
           .where((key) => key.toString().contains('_'))
@@ -71,7 +71,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: darkBG,
         title: const Text('Accounts'),
       ),
       body: hasImported ? ListOfAccounts(accounts: accounts) : const Intro(),
@@ -79,16 +78,12 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            DrawerHeader(
+            const DrawerHeader(
               child: Text(
                 "GnuCash Mobile",
                 style: TextStyle(
-                  color: lightPrimary,
                   fontSize: 20,
                 ),
-              ),
-              decoration: BoxDecoration(
-                color: darkBG,
               ),
             ),
             ListTile(
@@ -210,7 +205,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       ),
       floatingActionButton: hasImported
           ? FloatingActionButton(
-              backgroundColor: darkBG,
               child: const Icon(Icons.add),
               onPressed: () async {
                 final _success = await Navigator.push(
