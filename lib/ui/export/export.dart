@@ -9,14 +9,14 @@ import 'package:gnucash_mobile/core/providers/transactions.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
-class Export extends ConsumerStatefulWidget {
-  const Export({super.key});
+class ExportScreen extends ConsumerStatefulWidget {
+  const ExportScreen({super.key});
 
   @override
   _ExportState createState() => _ExportState();
 }
 
-class _ExportState extends ConsumerState<Export> {
+class _ExportState extends ConsumerState<ExportScreen> {
   String _directoryPath = "/";
   String _directory = "/";
 

@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gnucash_mobile/core/models/account.dart';
 import 'package:gnucash_mobile/core/models/account_node.dart';
 import 'package:gnucash_mobile/core/providers/accounts.dart';
-import 'package:gnucash_mobile/ui/home/home_screen.dart';
+import 'package:gnucash_mobile/ui/home/home.dart';
 import 'package:gnucash_mobile/ui/intro/intro_state.dart';
 
 class IntroScreen extends ConsumerWidget {

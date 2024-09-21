@@ -7,7 +7,7 @@ part 'transaction.freezed.dart';
 part 'transaction.g.dart';
 
 @freezed
-class Transaction with _$Transaction {
+class Transaction with _$Transaction implements Comparable<Transaction> {
   const factory Transaction({
     /// The date of the transaction.
     required DateTime date,
@@ -44,6 +44,15 @@ class Transaction with _$Transaction {
 
   factory Transaction.fromJson(Map<String, dynamic> json) =>
       _$TransactionFromJson(json);
+
+  @override
+  int compareTo(Transaction other) {
+    int dateCompare = date.compareTo(other.date);
+    if (dateCompare != 0) {
+      return dateCompare;
+    }
+    return amount.compareTo(other.amount);
+  }
 }
 
 /// Converts a transaction to a CSV row.

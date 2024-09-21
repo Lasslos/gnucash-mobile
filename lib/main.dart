@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gnucash_mobile/core/providers/accounts.dart';
-import 'package:gnucash_mobile/ui/home/home_screen.dart';
+import 'package:gnucash_mobile/ui/home/home.dart';
 import 'package:gnucash_mobile/ui/intro/intro.dart';
 import 'package:gnucash_mobile/utils.dart';
 
