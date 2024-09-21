@@ -40,7 +40,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         title: const Text('Accounts'),
       ),
-      body: hasImported ? ListOfAccounts(accountNodes: accountNodes) : const Intro(),
+      body: hasImported ? ListOfAccounts(accountNodes: accountNodes) : const IntroScreen(),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,

@@ -34,7 +34,7 @@ class MyApp extends ConsumerWidget {
         brightness: Brightness.dark,
       ),
       themeMode: ThemeMode.system,
-      home: hasImportedAccounts ? const HomeScreen() : const Intro(),
+      home: hasImportedAccounts ? const HomeScreen() : const IntroScreen(),
     );
   }
 }
