@@ -23,7 +23,7 @@ class Intro extends ConsumerWidget {
           transitionType: SharedAxisTransitionType.horizontal,
           child: child,
         ),
-        child: switch (ref.watch(introStateProvider).currentIndex) {
+        child: switch (ref.watch(introStateProvider)) {
           0 => const WelcomePage(),
           1 => const ImportPage(),
           2 => const ApprovePage(),
@@ -74,8 +74,7 @@ class WelcomePage extends ConsumerWidget {
               const Spacer(),
               FilledButton(
                 onPressed: () {
-                  ref.read(introStateProvider.notifier).state =
-                      const IntroState(currentIndex: 1);
+                  ref.read(introStateProvider.notifier).state = 1;
                 },
                 child: const Text('Get started'),
               ),
@@ -216,8 +215,7 @@ class ImportPage extends ConsumerWidget {
       return;
     }
 
-    ref.read(introStateProvider.notifier).state =
-        const IntroState(currentIndex: 2);
+    ref.read(introStateProvider.notifier).state = 2;
   }
 }
 
@@ -293,7 +291,7 @@ class ApprovePage extends ConsumerWidget {
             FilledButton.tonal(
               onPressed: () {
                 ref.read(rootAccountNodesProvider.notifier).clear();
-                ref.read(introStateProvider.notifier).state = const IntroState(currentIndex: 1);
+                ref.read(introStateProvider.notifier).state = 1;
               },
               child: const Text('Retry'),
             ),
