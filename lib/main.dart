@@ -1,7 +1,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gnucash_mobile/ui/home_screen/home_screen.dart';
+import 'package:gnucash_mobile/core/providers/accounts.dart';
+import 'package:gnucash_mobile/ui/home/home_screen.dart';
+import 'package:gnucash_mobile/ui/intro/intro.dart';
 import 'package:gnucash_mobile/utils.dart';
 
 void main() async {
@@ -14,23 +16,26 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    bool hasImportedAccounts = ref.read(rootAccountNodesProvider).isNotEmpty;
+
     return MaterialApp(
       title: "GnuCash Refined",
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorSchemeSeed: Colors.green,
         brightness: Brightness.light,
       ),
       darkTheme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorSchemeSeed: Colors.green,
         brightness: Brightness.dark,
       ),
       themeMode: ThemeMode.system,
-      home: const HomeScreen(),
+      home: hasImportedAccounts ? const HomeScreen() : const Intro(),
     );
   }
 }
+

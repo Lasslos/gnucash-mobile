@@ -11,7 +11,7 @@ import 'package:gnucash_mobile/core/providers/accounts.dart';
 import 'package:gnucash_mobile/core/providers/transactions.dart';
 import 'package:gnucash_mobile/ui/export.dart';
 import 'package:gnucash_mobile/ui/favorites.dart';
-import 'package:gnucash_mobile/ui/intro.dart';
+import 'package:gnucash_mobile/ui/intro/intro.dart';
 import 'package:gnucash_mobile/ui/list_of_accounts.dart';
 import 'package:gnucash_mobile/ui/transaction_form.dart';
 
