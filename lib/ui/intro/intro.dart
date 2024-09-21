@@ -107,7 +107,7 @@ class ImportPage extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  'Import your GnuCash transactions',
+                  'Import your GnuCash account tree',
                   style: Theme.of(context).textTheme.displaySmall,
                   textAlign: TextAlign.center,
                 ),
@@ -116,45 +116,68 @@ class ImportPage extends ConsumerWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: RichText(
-                    text: TextSpan(
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      children: const [
-                        TextSpan(
-                          text: '1.',
-                          style: TextStyle(
-                            fontSize: 14,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "1. ",
+                            style: Theme.of(context).textTheme.bodyLarge,
                           ),
-                        ),
-                        TextSpan(
-                          text: ' Open GnuCash on your computer\n',
-                        ),
-                        TextSpan(
-                          text: '2.',
-                          style: TextStyle(
-                            fontSize: 14,
+                          Expanded(
+                            child: Text(
+                              "Open GnuCash on your computer",
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: ' Choose ',
-                        ),
-                        TextSpan(
-                          text: 'File > Export > Export Account Tree to CSV\n',
-                          style: TextStyle(
-                            fontStyle: FontStyle.italic,
+                        ],
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "2. ",
+                            style: Theme.of(context).textTheme.bodyLarge,
                           ),
-                        ),
-                        TextSpan(
-                          text: '3.',
-                          style: TextStyle(
-                            fontSize: 14,
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                style: Theme.of(context).textTheme.bodyLarge,
+                                children: const [
+                                  TextSpan(
+                                    text: 'Choose ',
+                                  ),
+                                  TextSpan(
+                                    text:
+                                        'File > Export > Export\u{00A0}Account\u{00A0}Tree\u{00A0}to\u{00A0}CSV',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: ' Save the file to your phone\n',
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "3. ",
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          Expanded(
+                            child: Text(
+                              "Save the file to your phone",
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
                 const Spacer(flex: 3),
@@ -215,6 +238,20 @@ class ImportPage extends ConsumerWidget {
       return;
     }
 
+    List<AccountNode> accountNodes = ref.watch(rootAccountNodesProvider);
+    if (accountNodes.isEmpty) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content:
+                Text('No accounts were imported. Is this the correct file?'),
+          ),
+        );
+      }
+      return;
+    }
+
     ref.read(introStateProvider.notifier).state = 2;
   }
 }
@@ -258,7 +295,7 @@ class ApprovePage extends ConsumerWidget {
                     height: 16,
                   ),
                   Text(
-                    'You can now start creating transactions.\nBelow are the accounts you imported.',
+                    'You can now start creating transactions.\nBelow are the accounts you\'ve imported.',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
@@ -274,7 +311,7 @@ class ApprovePage extends ConsumerWidget {
                   return const SizedBox.shrink();
                 }
                 return ListTile(
-                  title: Text(item.data?.fullName ?? "Empty title"),
+                  title: Text(item.data?.name ?? "Empty title"),
                   subtitle: Text(item.data?.description ?? ""),
                 );
               },
@@ -300,7 +337,10 @@ class ApprovePage extends ConsumerWidget {
             ),
             FilledButton(
               onPressed: () {
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomeScreen()),
+                );
               },
               child: const Text('Ok'),
             ),
