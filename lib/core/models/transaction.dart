@@ -81,4 +81,3 @@ List<String> transactionToCSV(Account account, Transaction transaction) {
     "", // Rate/Price
   ];
 }
-
