@@ -46,28 +46,66 @@ class TransactionsView extends ConsumerWidget {
     transactions.sort((a, b) => a.value.compareTo(b.value));
 
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          // clear all transactions
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () => _deleteTransactions(context, ref, transactions),
-          ),
-        ],
-      ),
+      appBar: accountNode == null
+          ? null
+          : AppBar(
+              title: Text(
+                "${accountNode!.account.name}",
+              ),
+              actions: [
+                // clear all transactions
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () =>
+                      _deleteTransactions(context, ref, transactions),
+                ),
+              ],
+            ),
       body: ListView(
-        children: transactions.map((accountTransactionPair) {
-          return TransactionWidget(
-            account: accountTransactionPair.key,
-            transaction: accountTransactionPair.value,
-          );
-        }).toList(),
+        children: [
+          for (MapEntry<Account, Transaction> pair in transactions)
+            Dismissible(
+              key: ValueKey(pair.value),
+              onDismissed: (direction) {
+                //TODO: Remove transaction in second account!
+                ref.read(transactionsProvider(pair.key).notifier)
+                    .remove(pair.value);
+              },
+              confirmDismiss: (direction) async {
+                return false;
+              },
+
+              background: Container(
+                color: Colors.red,
+                alignment: Alignment.centerLeft,
+                child: const Icon(
+                  Icons.delete,
+                  color: Colors.white,
+                ),
+              ),
+              secondaryBackground: Container(
+                color: Colors.red,
+                alignment: Alignment.centerRight,
+                child: const Icon(
+                  Icons.delete,
+                  color: Colors.white,
+                ),
+              ),
+              child: TransactionWidget(
+                account: pair.key,
+                transaction: pair.value,
+              ),
+            ),
+        ],
       ),
     );
   }
 
-  Future<void> _deleteTransactions(BuildContext context, WidgetRef ref,
-      List<MapEntry<Account, Transaction>> transactions) {
+  Future<void> _deleteTransactions(
+    BuildContext context,
+    WidgetRef ref,
+    List<MapEntry<Account, Transaction>> transactions,
+  ) {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button
@@ -96,6 +134,7 @@ class TransactionsView extends ConsumerWidget {
               ),
               onPressed: () {
                 for (MapEntry<Account, Transaction> mapEntry in transactions) {
+                  //TODO: Remove transaction in second account!
                   ref
                       .read(transactionsProvider(mapEntry.key).notifier)
                       .remove(mapEntry.value);
@@ -133,9 +172,9 @@ class TransactionWidget extends StatelessWidget {
       trailing: Text(
         transaction.amount.toString(),
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: transaction.amount.isNegative ? Colors.red : null,
-        ),
+              fontWeight: FontWeight.bold,
+              color: transaction.amount.isNegative ? Colors.red : null,
+            ),
       ),
     );
   }

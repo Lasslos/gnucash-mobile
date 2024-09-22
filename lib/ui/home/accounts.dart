@@ -8,9 +8,10 @@ import 'package:gnucash_mobile/core/models/account_node.dart';
 import 'package:gnucash_mobile/core/models/transaction.dart';
 import 'package:gnucash_mobile/core/providers/accounts.dart';
 import 'package:gnucash_mobile/core/providers/transactions.dart';
+import 'package:gnucash_mobile/ui/home/transactions.dart';
 
-class AccountView extends ConsumerWidget {
-  const AccountView({super.key});
+class AccountsScreen extends ConsumerWidget {
+  const AccountsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,15 +25,17 @@ class AccountView extends ConsumerWidget {
     List<AccountNode> accountNodes = ref.watch(rootAccountNodesProvider);
     accountTree.addAll(accountNodes.map(buildAccountTree));
 
-    return TreeView.simple(
-      showRootNode: false,
-      builder: (context, node) {
-        return AccountTreeNodeWidget(node: node);
-      },
-      expansionIndicatorBuilder: (context, node) {
-        return NoExpansionIndicator(tree: node);
-      },
-      tree: accountTree,
+    return SafeArea(
+      child: TreeView.simple(
+        showRootNode: false,
+        builder: (context, node) {
+          return AccountTreeNodeWidget(node: node);
+        },
+        expansionIndicatorBuilder: (context, node) {
+          return NoExpansionIndicator(tree: node);
+        },
+        tree: accountTree,
+      ),
     );
   }
 }
@@ -67,7 +70,7 @@ class AccountTreeNodeWidget extends ConsumerWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
       child: ListTile(
         leading: hasChildren
             ? AnimatedRotation(
@@ -78,17 +81,24 @@ class AccountTreeNodeWidget extends ConsumerWidget {
               )
             : null,
         title: Text(account.name),
-        subtitle: Text(account.description ?? ""),
         onTap: account.placeholder
             ? null
             : () {
-                Navigator.of(context).pushNamed(
-                  "/transactions",
-                  arguments: accountNode,
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        TransactionsView(accountNode: accountNode),
+                  ),
                 );
               },
         //TODO: Localize currency
-        trailing: Text(balance.toStringAsFixed(2)),
+        trailing: Text(
+          balance.toStringAsFixed(2),
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: balance.isNegative ? Colors.red : null,
+              ),
+        ),
       ),
     );
   }
