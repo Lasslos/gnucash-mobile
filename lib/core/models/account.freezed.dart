@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'accounts.dart';
+part of 'account.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -20,21 +20,43 @@ Account _$AccountFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Account {
+  /// The type of the account.
+  ///
+  /// Example: `ASSET`, `LIABILITY`, `EQUITY`, `INCOME`, `EXPENSE`
   String get type => throw _privateConstructorUsedError;
+
+  /// Fully qualified account name, separated by colons.
+  ///
+  /// Example: `Assets:Checking Account`
   String get fullName => throw _privateConstructorUsedError;
+
+  /// Account name. [fullName] ends with [name].
   String get name => throw _privateConstructorUsedError;
-  String get code => throw _privateConstructorUsedError;
-  String get description => throw _privateConstructorUsedError;
-  String get color => throw _privateConstructorUsedError;
-  String get notes => throw _privateConstructorUsedError;
-  String get commodityM => throw _privateConstructorUsedError;
-  String get commodityN => throw _privateConstructorUsedError;
+
+  /// Currency symbol.
+  ///
+  /// Example: `EUR`, `USD`
+  String get symbol => throw _privateConstructorUsedError;
+
+  /// Commodity namespace.
+  ///
+  /// Example: `CURRENCY`, `STOCK`
+  String get namespace => throw _privateConstructorUsedError;
   bool get hidden => throw _privateConstructorUsedError;
+
+  /// `true` if the account is a tax-relevant account.
   bool get tax => throw _privateConstructorUsedError;
+
+  /// `true` if the account should not be used for transactions.
   bool get placeholder => throw _privateConstructorUsedError;
-  double get balance => throw _privateConstructorUsedError;
-  List<Account> get children => throw _privateConstructorUsedError;
-  String? get parentFullName => throw _privateConstructorUsedError;
+  String? get code => throw _privateConstructorUsedError;
+  String? get description => throw _privateConstructorUsedError;
+
+  /// Color in ----- format. If empty, use #f0ecec.
+  /// TODO: Add format and parsing for color.
+  @Deprecated("Unfinished feature")
+  String? get color => throw _privateConstructorUsedError;
+  String? get notes => throw _privateConstructorUsedError;
 
   /// Serializes this Account to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -54,18 +76,15 @@ abstract class $AccountCopyWith<$Res> {
       {String type,
       String fullName,
       String name,
-      String code,
-      String description,
-      String color,
-      String notes,
-      String commodityM,
-      String commodityN,
+      String symbol,
+      String namespace,
       bool hidden,
       bool tax,
       bool placeholder,
-      double balance,
-      List<Account> children,
-      String? parentFullName});
+      String? code,
+      String? description,
+      @Deprecated("Unfinished feature") String? color,
+      String? notes});
 }
 
 /// @nodoc
@@ -86,18 +105,15 @@ class _$AccountCopyWithImpl<$Res, $Val extends Account>
     Object? type = null,
     Object? fullName = null,
     Object? name = null,
-    Object? code = null,
-    Object? description = null,
-    Object? color = null,
-    Object? notes = null,
-    Object? commodityM = null,
-    Object? commodityN = null,
+    Object? symbol = null,
+    Object? namespace = null,
     Object? hidden = null,
     Object? tax = null,
     Object? placeholder = null,
-    Object? balance = null,
-    Object? children = null,
-    Object? parentFullName = freezed,
+    Object? code = freezed,
+    Object? description = freezed,
+    Object? color = freezed,
+    Object? notes = freezed,
   }) {
     return _then(_value.copyWith(
       type: null == type
@@ -112,29 +128,13 @@ class _$AccountCopyWithImpl<$Res, $Val extends Account>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      code: null == code
-          ? _value.code
-          : code // ignore: cast_nullable_to_non_nullable
+      symbol: null == symbol
+          ? _value.symbol
+          : symbol // ignore: cast_nullable_to_non_nullable
               as String,
-      description: null == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String,
-      color: null == color
-          ? _value.color
-          : color // ignore: cast_nullable_to_non_nullable
-              as String,
-      notes: null == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as String,
-      commodityM: null == commodityM
-          ? _value.commodityM
-          : commodityM // ignore: cast_nullable_to_non_nullable
-              as String,
-      commodityN: null == commodityN
-          ? _value.commodityN
-          : commodityN // ignore: cast_nullable_to_non_nullable
+      namespace: null == namespace
+          ? _value.namespace
+          : namespace // ignore: cast_nullable_to_non_nullable
               as String,
       hidden: null == hidden
           ? _value.hidden
@@ -148,17 +148,21 @@ class _$AccountCopyWithImpl<$Res, $Val extends Account>
           ? _value.placeholder
           : placeholder // ignore: cast_nullable_to_non_nullable
               as bool,
-      balance: null == balance
-          ? _value.balance
-          : balance // ignore: cast_nullable_to_non_nullable
-              as double,
-      children: null == children
-          ? _value.children
-          : children // ignore: cast_nullable_to_non_nullable
-              as List<Account>,
-      parentFullName: freezed == parentFullName
-          ? _value.parentFullName
-          : parentFullName // ignore: cast_nullable_to_non_nullable
+      code: freezed == code
+          ? _value.code
+          : code // ignore: cast_nullable_to_non_nullable
+              as String?,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
+      color: freezed == color
+          ? _value.color
+          : color // ignore: cast_nullable_to_non_nullable
+              as String?,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
               as String?,
     ) as $Val);
   }
@@ -175,18 +179,15 @@ abstract class _$$AccountImplCopyWith<$Res> implements $AccountCopyWith<$Res> {
       {String type,
       String fullName,
       String name,
-      String code,
-      String description,
-      String color,
-      String notes,
-      String commodityM,
-      String commodityN,
+      String symbol,
+      String namespace,
       bool hidden,
       bool tax,
       bool placeholder,
-      double balance,
-      List<Account> children,
-      String? parentFullName});
+      String? code,
+      String? description,
+      @Deprecated("Unfinished feature") String? color,
+      String? notes});
 }
 
 /// @nodoc
@@ -205,18 +206,15 @@ class __$$AccountImplCopyWithImpl<$Res>
     Object? type = null,
     Object? fullName = null,
     Object? name = null,
-    Object? code = null,
-    Object? description = null,
-    Object? color = null,
-    Object? notes = null,
-    Object? commodityM = null,
-    Object? commodityN = null,
+    Object? symbol = null,
+    Object? namespace = null,
     Object? hidden = null,
     Object? tax = null,
     Object? placeholder = null,
-    Object? balance = null,
-    Object? children = null,
-    Object? parentFullName = freezed,
+    Object? code = freezed,
+    Object? description = freezed,
+    Object? color = freezed,
+    Object? notes = freezed,
   }) {
     return _then(_$AccountImpl(
       type: null == type
@@ -231,29 +229,13 @@ class __$$AccountImplCopyWithImpl<$Res>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      code: null == code
-          ? _value.code
-          : code // ignore: cast_nullable_to_non_nullable
+      symbol: null == symbol
+          ? _value.symbol
+          : symbol // ignore: cast_nullable_to_non_nullable
               as String,
-      description: null == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String,
-      color: null == color
-          ? _value.color
-          : color // ignore: cast_nullable_to_non_nullable
-              as String,
-      notes: null == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as String,
-      commodityM: null == commodityM
-          ? _value.commodityM
-          : commodityM // ignore: cast_nullable_to_non_nullable
-              as String,
-      commodityN: null == commodityN
-          ? _value.commodityN
-          : commodityN // ignore: cast_nullable_to_non_nullable
+      namespace: null == namespace
+          ? _value.namespace
+          : namespace // ignore: cast_nullable_to_non_nullable
               as String,
       hidden: null == hidden
           ? _value.hidden
@@ -267,17 +249,21 @@ class __$$AccountImplCopyWithImpl<$Res>
           ? _value.placeholder
           : placeholder // ignore: cast_nullable_to_non_nullable
               as bool,
-      balance: null == balance
-          ? _value.balance
-          : balance // ignore: cast_nullable_to_non_nullable
-              as double,
-      children: null == children
-          ? _value.children
-          : children // ignore: cast_nullable_to_non_nullable
-              as List<Account>,
-      parentFullName: freezed == parentFullName
-          ? _value.parentFullName
-          : parentFullName // ignore: cast_nullable_to_non_nullable
+      code: freezed == code
+          ? _value.code
+          : code // ignore: cast_nullable_to_non_nullable
+              as String?,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
+      color: freezed == color
+          ? _value.color
+          : color // ignore: cast_nullable_to_non_nullable
+              as String?,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
               as String?,
     ));
   }
@@ -290,59 +276,73 @@ class _$AccountImpl extends _Account with DiagnosticableTreeMixin {
       {required this.type,
       required this.fullName,
       required this.name,
-      required this.code,
-      required this.description,
-      required this.color,
-      required this.notes,
-      required this.commodityM,
-      required this.commodityN,
+      required this.symbol,
+      required this.namespace,
       required this.hidden,
       required this.tax,
       required this.placeholder,
-      this.balance = 0,
-      this.children = const [],
-      this.parentFullName})
+      this.code,
+      this.description,
+      @Deprecated("Unfinished feature") this.color,
+      this.notes})
       : super._();
 
   factory _$AccountImpl.fromJson(Map<String, dynamic> json) =>
       _$$AccountImplFromJson(json);
 
+  /// The type of the account.
+  ///
+  /// Example: `ASSET`, `LIABILITY`, `EQUITY`, `INCOME`, `EXPENSE`
   @override
   final String type;
+
+  /// Fully qualified account name, separated by colons.
+  ///
+  /// Example: `Assets:Checking Account`
   @override
   final String fullName;
+
+  /// Account name. [fullName] ends with [name].
   @override
   final String name;
+
+  /// Currency symbol.
+  ///
+  /// Example: `EUR`, `USD`
   @override
-  final String code;
+  final String symbol;
+
+  /// Commodity namespace.
+  ///
+  /// Example: `CURRENCY`, `STOCK`
   @override
-  final String description;
-  @override
-  final String color;
-  @override
-  final String notes;
-  @override
-  final String commodityM;
-  @override
-  final String commodityN;
+  final String namespace;
   @override
   final bool hidden;
+
+  /// `true` if the account is a tax-relevant account.
   @override
   final bool tax;
+
+  /// `true` if the account should not be used for transactions.
   @override
   final bool placeholder;
   @override
-  @JsonKey()
-  final double balance;
+  final String? code;
   @override
-  @JsonKey()
-  final List<Account> children;
+  final String? description;
+
+  /// Color in ----- format. If empty, use #f0ecec.
+  /// TODO: Add format and parsing for color.
   @override
-  final String? parentFullName;
+  @Deprecated("Unfinished feature")
+  final String? color;
+  @override
+  final String? notes;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'Account(type: $type, fullName: $fullName, name: $name, code: $code, description: $description, color: $color, notes: $notes, commodityM: $commodityM, commodityN: $commodityN, hidden: $hidden, tax: $tax, placeholder: $placeholder, balance: $balance, children: $children, parentFullName: $parentFullName)';
+    return 'Account(type: $type, fullName: $fullName, name: $name, symbol: $symbol, namespace: $namespace, hidden: $hidden, tax: $tax, placeholder: $placeholder, code: $code, description: $description, color: $color, notes: $notes)';
   }
 
   @override
@@ -353,18 +353,15 @@ class _$AccountImpl extends _Account with DiagnosticableTreeMixin {
       ..add(DiagnosticsProperty('type', type))
       ..add(DiagnosticsProperty('fullName', fullName))
       ..add(DiagnosticsProperty('name', name))
-      ..add(DiagnosticsProperty('code', code))
-      ..add(DiagnosticsProperty('description', description))
-      ..add(DiagnosticsProperty('color', color))
-      ..add(DiagnosticsProperty('notes', notes))
-      ..add(DiagnosticsProperty('commodityM', commodityM))
-      ..add(DiagnosticsProperty('commodityN', commodityN))
+      ..add(DiagnosticsProperty('symbol', symbol))
+      ..add(DiagnosticsProperty('namespace', namespace))
       ..add(DiagnosticsProperty('hidden', hidden))
       ..add(DiagnosticsProperty('tax', tax))
       ..add(DiagnosticsProperty('placeholder', placeholder))
-      ..add(DiagnosticsProperty('balance', balance))
-      ..add(DiagnosticsProperty('children', children))
-      ..add(DiagnosticsProperty('parentFullName', parentFullName));
+      ..add(DiagnosticsProperty('code', code))
+      ..add(DiagnosticsProperty('description', description))
+      ..add(DiagnosticsProperty('color', color))
+      ..add(DiagnosticsProperty('notes', notes));
   }
 
   @override
@@ -376,44 +373,24 @@ class _$AccountImpl extends _Account with DiagnosticableTreeMixin {
             (identical(other.fullName, fullName) ||
                 other.fullName == fullName) &&
             (identical(other.name, name) || other.name == name) &&
-            (identical(other.code, code) || other.code == code) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
-            (identical(other.color, color) || other.color == color) &&
-            (identical(other.notes, notes) || other.notes == notes) &&
-            (identical(other.commodityM, commodityM) ||
-                other.commodityM == commodityM) &&
-            (identical(other.commodityN, commodityN) ||
-                other.commodityN == commodityN) &&
+            (identical(other.symbol, symbol) || other.symbol == symbol) &&
+            (identical(other.namespace, namespace) ||
+                other.namespace == namespace) &&
             (identical(other.hidden, hidden) || other.hidden == hidden) &&
             (identical(other.tax, tax) || other.tax == tax) &&
             (identical(other.placeholder, placeholder) ||
                 other.placeholder == placeholder) &&
-            (identical(other.balance, balance) || other.balance == balance) &&
-            const DeepCollectionEquality().equals(other.children, children) &&
-            (identical(other.parentFullName, parentFullName) ||
-                other.parentFullName == parentFullName));
+            (identical(other.code, code) || other.code == code) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
+            (identical(other.color, color) || other.color == color) &&
+            (identical(other.notes, notes) || other.notes == notes));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      type,
-      fullName,
-      name,
-      code,
-      description,
-      color,
-      notes,
-      commodityM,
-      commodityN,
-      hidden,
-      tax,
-      placeholder,
-      balance,
-      const DeepCollectionEquality().hash(children),
-      parentFullName);
+  int get hashCode => Object.hash(runtimeType, type, fullName, name, symbol,
+      namespace, hidden, tax, placeholder, code, description, color, notes);
 
   /// Create a copy of Account
   /// with the given fields replaced by the non-null parameter values.
@@ -436,52 +413,68 @@ abstract class _Account extends Account {
       {required final String type,
       required final String fullName,
       required final String name,
-      required final String code,
-      required final String description,
-      required final String color,
-      required final String notes,
-      required final String commodityM,
-      required final String commodityN,
+      required final String symbol,
+      required final String namespace,
       required final bool hidden,
       required final bool tax,
       required final bool placeholder,
-      final double balance,
-      final List<Account> children,
-      final String? parentFullName}) = _$AccountImpl;
+      final String? code,
+      final String? description,
+      @Deprecated("Unfinished feature") final String? color,
+      final String? notes}) = _$AccountImpl;
   const _Account._() : super._();
 
   factory _Account.fromJson(Map<String, dynamic> json) = _$AccountImpl.fromJson;
 
+  /// The type of the account.
+  ///
+  /// Example: `ASSET`, `LIABILITY`, `EQUITY`, `INCOME`, `EXPENSE`
   @override
   String get type;
+
+  /// Fully qualified account name, separated by colons.
+  ///
+  /// Example: `Assets:Checking Account`
   @override
   String get fullName;
+
+  /// Account name. [fullName] ends with [name].
   @override
   String get name;
+
+  /// Currency symbol.
+  ///
+  /// Example: `EUR`, `USD`
   @override
-  String get code;
+  String get symbol;
+
+  /// Commodity namespace.
+  ///
+  /// Example: `CURRENCY`, `STOCK`
   @override
-  String get description;
-  @override
-  String get color;
-  @override
-  String get notes;
-  @override
-  String get commodityM;
-  @override
-  String get commodityN;
+  String get namespace;
   @override
   bool get hidden;
+
+  /// `true` if the account is a tax-relevant account.
   @override
   bool get tax;
+
+  /// `true` if the account should not be used for transactions.
   @override
   bool get placeholder;
   @override
-  double get balance;
+  String? get code;
   @override
-  List<Account> get children;
+  String? get description;
+
+  /// Color in ----- format. If empty, use #f0ecec.
+  /// TODO: Add format and parsing for color.
   @override
-  String? get parentFullName;
+  @Deprecated("Unfinished feature")
+  String? get color;
+  @override
+  String? get notes;
 
   /// Create a copy of Account
   /// with the given fields replaced by the non-null parameter values.

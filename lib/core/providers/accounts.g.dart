@@ -3,56 +3,25 @@
 part of 'accounts.dart';
 
 // **************************************************************************
-// JsonSerializableGenerator
-// **************************************************************************
-
-_$AccountImpl _$$AccountImplFromJson(Map<String, dynamic> json) =>
-    _$AccountImpl(
-      type: json['type'] as String,
-      fullName: json['fullName'] as String,
-      name: json['name'] as String,
-      code: json['code'] as String,
-      description: json['description'] as String,
-      color: json['color'] as String,
-      notes: json['notes'] as String,
-      commodityM: json['commodityM'] as String,
-      commodityN: json['commodityN'] as String,
-      hidden: json['hidden'] as bool,
-      tax: json['tax'] as bool,
-      placeholder: json['placeholder'] as bool,
-      balance: (json['balance'] as num?)?.toDouble() ?? 0,
-      children: (json['children'] as List<dynamic>?)
-              ?.map((e) => Account.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
-      parentFullName: json['parentFullName'] as String?,
-    );
-
-Map<String, dynamic> _$$AccountImplToJson(_$AccountImpl instance) =>
-    <String, dynamic>{
-      'type': instance.type,
-      'fullName': instance.fullName,
-      'name': instance.name,
-      'code': instance.code,
-      'description': instance.description,
-      'color': instance.color,
-      'notes': instance.notes,
-      'commodityM': instance.commodityM,
-      'commodityN': instance.commodityN,
-      'hidden': instance.hidden,
-      'tax': instance.tax,
-      'placeholder': instance.placeholder,
-      'balance': instance.balance,
-      'children': instance.children,
-      'parentFullName': instance.parentFullName,
-    };
-
-// **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
+String _$accountListHash() => r'49cd6b9f1609e78d4c127decef69b20c268e519e';
+
+/// See also [accountList].
+@ProviderFor(accountList)
+final accountListProvider = AutoDisposeProvider<List<Account>>.internal(
+  accountList,
+  name: r'accountListProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$accountListHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef AccountListRef = AutoDisposeProviderRef<List<Account>>;
 String _$validTransactionAccountsHash() =>
-    r'bfe30421047afcb63d34e28a78d6adaae9abe44f';
+    r'8d9f6f7f91b0e5280bdaa50093cf5ebb27c90cfa';
 
 /// See also [validTransactionAccounts].
 @ProviderFor(validTransactionAccounts)
@@ -68,22 +37,23 @@ final validTransactionAccountsProvider =
 );
 
 typedef ValidTransactionAccountsRef = AutoDisposeProviderRef<List<Account>>;
-String _$accountsHash() => r'982c20a5a9377d27eec62113a3a276f22636bf3a';
+String _$accountTreeHash() => r'20177a930623a9ba1cc7e4f13e39b1c9f46cc9df';
 
 /// Stores and exposes the accounts.
 ///
-/// Copied from [Accounts].
-@ProviderFor(Accounts)
-final accountsProvider = NotifierProvider<Accounts, List<Account>>.internal(
-  Accounts.new,
-  name: r'accountsProvider',
+/// Copied from [AccountTree].
+@ProviderFor(AccountTree)
+final accountTreeProvider =
+    NotifierProvider<AccountTree, List<AccountNode>>.internal(
+  AccountTree.new,
+  name: r'accountTreeProvider',
   debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$accountsHash,
+      const bool.fromEnvironment('dart.vm.product') ? null : _$accountTreeHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$Accounts = Notifier<List<Account>>;
+typedef _$AccountTree = Notifier<List<AccountNode>>;
 String _$favoriteDebitAccountHash() =>
     r'30cfa8aabd644faea0c49155c1e53236d02cabe4';
 
