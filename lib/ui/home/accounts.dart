@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:animated_tree_view/animated_tree_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,14 +50,12 @@ class AccountTreeNodeWidget extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     Account account = accountNode.account;
-
-    List<Transaction> transactions = [];
-    Queue<AccountNode> queue = Queue<AccountNode>.from([accountNode]);
-    while (queue.isNotEmpty) {
-      AccountNode current = queue.removeFirst();
-      transactions.addAll(ref.watch(transactionsProvider(current.account)));
-      queue.addAll(current.children);
-    }
+    List<AccountNode> descendants = accountNode.descendants.toList();
+    List<Transaction> transactions = [
+      ...ref.watch(transactionsProvider(account)),
+      for (AccountNode descendant in descendants)
+        ...ref.watch(transactionsProvider(descendant.account)),
+    ];
     double balance = 0;
     for (Transaction transaction in transactions) {
       balance += transaction.amount;
@@ -87,7 +83,7 @@ class AccountTreeNodeWidget extends ConsumerWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) =>
-                        TransactionsView(accountNode: accountNode),
+                        TransactionsView(account: accountNode.account),
                   ),
                 );
               },

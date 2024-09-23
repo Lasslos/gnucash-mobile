@@ -1,4 +1,3 @@
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:core';
 
@@ -69,28 +68,18 @@ class AccountTree extends _$AccountTree {
 
 @riverpod
 List<Account> accountList(AccountListRef ref) {
-  Queue<AccountNode> accounts = Queue()..addAll(ref.watch(accountTreeProvider));
   List<Account> allAccounts = [];
-  while (accounts.isNotEmpty) {
-    AccountNode accountNode = accounts.removeFirst();
-    accounts.addAll(accountNode.children);
-    allAccounts.add(accountNode.account);
+  for (AccountNode accountNode in ref.watch(accountTreeProvider)) {
+    allAccounts
+      ..add(accountNode.account)
+      ..addAll(accountNode.descendants.map((node) => node.account));
   }
   return allAccounts;
 }
 
 @riverpod
 List<Account> validTransactionAccounts(ValidTransactionAccountsRef ref) {
-  Queue<AccountNode> accounts = Queue()..addAll(ref.watch(accountTreeProvider));
-  List<Account> validAccounts = [];
-  while (accounts.isNotEmpty) {
-    AccountNode accountNode = accounts.removeFirst();
-    accounts.addAll(accountNode.children);
-    if (!accountNode.account.placeholder) {
-      validAccounts.add(accountNode.account);
-    }
-  }
-  return validAccounts;
+  return ref.watch(accountListProvider).where((account) => !account.placeholder).toList();
 }
 
 @riverpod

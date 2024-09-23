@@ -1,12 +1,8 @@
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gnucash_mobile/core/models/account.dart';
-import 'package:gnucash_mobile/core/models/account_node.dart';
 import 'package:gnucash_mobile/core/models/transaction.dart';
-import 'package:gnucash_mobile/core/providers/accounts.dart';
 import 'package:gnucash_mobile/core/providers/transactions.dart';
 import 'package:intl/intl.dart';
 
@@ -14,57 +10,54 @@ class TransactionsView extends ConsumerWidget {
   /// The account node to display transactions for.
   ///
   /// If null, all transactions will be displayed.
-  final AccountNode? accountNode;
+  final Account? account;
 
-  const TransactionsView({required this.accountNode, super.key});
+  const TransactionsView({required this.account, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    List<MapEntry<Account, Transaction>> transactions = [];
-    // If no accountNode is selected, show all transactions.
-    // Otherwise, show only those belonging to the selected account node.
-    if (accountNode == null) {
-      Queue<AccountNode> queue = Queue<AccountNode>()
-        ..addAll(ref.watch(accountTreeProvider));
-      while (queue.isNotEmpty) {
-        AccountNode current = queue.removeFirst();
-        List<Transaction> currentTransactions =
-            ref.watch(transactionsProvider(current.account));
-        for (Transaction transaction in currentTransactions) {
-          transactions.add(MapEntry(current.account, transaction));
-        }
-        queue.addAll(current.children);
-      }
+    if (account == null) {
+      return const _GlobalTransactionsView();
     } else {
-      transactions = ref
-          .watch(transactionsProvider(accountNode!.account))
-          .map(
-            (transaction) => MapEntry(accountNode!.account, transaction),
-          )
-          .toList();
+      return _SingleAccountTransactionsView(account: account!);
     }
+  }
+}
 
-    transactions.sort((a, b) => a.value.compareTo(b.value));
+class _GlobalTransactionsView extends ConsumerWidget {
+  const _GlobalTransactionsView({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Placeholder();
+  }
+}
+
+class _SingleAccountTransactionsView extends ConsumerWidget {
+  const _SingleAccountTransactionsView({required this.account, super.key});
+
+  final Account account;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    List<Transaction> transactions = ref.watch(transactionsProvider(account));
 
     return Scaffold(
-      appBar: accountNode == null
-          ? null
-          : AppBar(
-              title: Text(
-                "${accountNode!.account.name}",
-              ),
-              actions: [
-                // clear all transactions
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () =>
-                      _deleteTransactions(context, ref, transactions),
-                ),
-              ],
-            ),
+      appBar: AppBar(
+        title: Text(
+          "${account.name}",
+        ),
+        actions: [
+          // clear all transactions
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () => _deleteTransactions(context, ref, transactions),
+          ),
+        ],
+      ),
       body: ListView(
         children: [
-          for (MapEntry<Account, Transaction> pair in transactions)
+          for (Transaction transaction in transactions)
             Slidable(
               endActionPane: ActionPane(
                 motion: const ScrollMotion(),
@@ -85,10 +78,10 @@ class TransactionsView extends ConsumerWidget {
                   ),
                 ],
               ),
-              key: ValueKey(pair.value),
+              key: ValueKey(transaction),
               child: TransactionWidget(
-                account: pair.key,
-                transaction: pair.value,
+                account: account,
+                transaction: transaction,
               ),
             ),
         ],
@@ -96,10 +89,9 @@ class TransactionsView extends ConsumerWidget {
     );
   }
 
-  Future<void> _deleteTransactions(
-    BuildContext context,
+  Future<void> _deleteTransactions(BuildContext context,
     WidgetRef ref,
-    List<MapEntry<Account, Transaction>> transactions,
+    List<Transaction> transactions,
   ) {
     return showDialog<void>(
       context: context,
@@ -128,11 +120,10 @@ class TransactionsView extends ConsumerWidget {
                 style: TextStyle(inherit: true, color: Colors.red),
               ),
               onPressed: () {
-                for (MapEntry<Account, Transaction> mapEntry in transactions) {
+                for (Transaction transaction in transactions) {
                   //TODO: Remove transaction in second account!
-                  ref
-                      .read(transactionsProvider(mapEntry.key).notifier)
-                      .remove(mapEntry.value);
+                  ref.read(transactionsProvider(account).notifier)
+                      .remove(transaction);
                 }
                 Navigator.of(context).pop();
               },
@@ -166,10 +157,14 @@ class TransactionWidget extends StatelessWidget {
       isThreeLine: transaction.notes.isNotEmpty,
       trailing: Text(
         transaction.amount.toString(),
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: transaction.amount.isNegative ? Colors.red : null,
-            ),
+        style: Theme
+            .of(context)
+            .textTheme
+            .bodyLarge
+            ?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: transaction.amount.isNegative ? Colors.red : null,
+        ),
       ),
     );
   }

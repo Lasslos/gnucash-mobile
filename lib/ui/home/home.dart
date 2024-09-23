@@ -62,7 +62,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         },
         child: const [
           AccountsScreen(),
-          TransactionsView(accountNode: null),
+          TransactionsView(account: null),
           ExportScreen(),
           SettingsScreen(),
         ][_selectedIndex],

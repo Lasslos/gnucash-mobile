@@ -16,4 +16,11 @@ class AccountNode with _$AccountNode {
   const AccountNode._();
 
   factory AccountNode.fromJson(Map<String, dynamic> json) => _$AccountNodeFromJson(json);
+
+  Iterable<AccountNode> get descendants sync* {
+    for (AccountNode child in children) {
+      yield child;
+      yield* child.descendants;
+    }
+  }
 }
