@@ -14,134 +14,129 @@ class ExportScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Text(
+          "Export your transactions to a file",
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        Text(
+          "Here's what to do with it:",
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        const SizedBox(height: 16),
+        Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Export your transactions to a file",
-              style: Theme.of(context).textTheme.titleLarge,
+              "1. ",
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
-            Text(
-              "Here's what to do with it:",
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "1. ",
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                Expanded(
-                  child: Text(
-                    "Upload the file to your computer",
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "2. ",
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                Expanded(
-                  child: RichText(
-                    text: TextSpan(
-                      text: "In GnuCash, select ",
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      children: const [
-                        TextSpan(
-                          text:
-                              "File > Import > Import\u{00A0}Transactions\u{00A0}from\u{00A0}CSV",
-                          style: TextStyle(
-                            fontStyle: FontStyle.italic,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "3. ",
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                Expanded(
-                  child: Text(
-                    "Select the file",
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "4. ",
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                Expanded(
-                  child: RichText(
-                    text: TextSpan(
-                      text: "In ",
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      children: const [
-                        TextSpan(
-                          text: "Load\u{00A0}and\u{00A0}Save\u{00A0}Settings",
-                          style: TextStyle(
-                            fontStyle: FontStyle.italic,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextSpan(
-                          text: ", select ",
-                        ),
-                        TextSpan(
-                          text: "\"GnuCash\u{00A0}Export\u{00A0}Format\"",
-                          style: TextStyle(
-                            fontStyle: FontStyle.italic,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                const Spacer(),
-                OutlinedButton.icon(
-                  onPressed: () => saveToDownloads(context, ref),
-                  label: const Text("Save to Downloads"),
-                  icon: const Icon(Icons.download),
-                ),
-                const SizedBox(width: 16),
-                FilledButton.icon(
-                  onPressed: () => shareFile(context, ref),
-                  label: const Text("Share"),
-                  icon: const Icon(Icons.share),
-                ),
-              ],
+            Expanded(
+              child: Text(
+                "Upload the file to your computer",
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
             ),
           ],
         ),
-      ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "2. ",
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            Expanded(
+              child: RichText(
+                text: TextSpan(
+                  text: "In GnuCash, select ",
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  children: const [
+                    TextSpan(
+                      text:
+                          "File > Import > Import\u{00A0}Transactions\u{00A0}from\u{00A0}CSV",
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "3. ",
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            Expanded(
+              child: Text(
+                "Select the file",
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ),
+          ],
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "4. ",
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            Expanded(
+              child: RichText(
+                text: TextSpan(
+                  text: "In ",
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  children: const [
+                    TextSpan(
+                      text: "Load\u{00A0}and\u{00A0}Save\u{00A0}Settings",
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: ", select ",
+                    ),
+                    TextSpan(
+                      text: "\"GnuCash\u{00A0}Export\u{00A0}Format\"",
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            const Spacer(),
+            OutlinedButton.icon(
+              onPressed: () => saveToDownloads(context, ref),
+              label: const Text("Save to Downloads"),
+              icon: const Icon(Icons.download),
+            ),
+            const SizedBox(width: 16),
+            FilledButton.icon(
+              onPressed: () => shareFile(context, ref),
+              label: const Text("Share"),
+              icon: const Icon(Icons.share),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
