@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gnucash_mobile/core/models/account.dart';
 import 'package:gnucash_mobile/core/models/account_node.dart';
 import 'package:gnucash_mobile/core/models/transaction.dart';
@@ -64,33 +65,27 @@ class TransactionsView extends ConsumerWidget {
       body: ListView(
         children: [
           for (MapEntry<Account, Transaction> pair in transactions)
-            Dismissible(
+            Slidable(
+              endActionPane: ActionPane(
+                motion: const ScrollMotion(),
+                children: [
+                  SlidableAction(
+                    icon: Icons.edit,
+                    backgroundColor: Colors.green,
+                    onPressed: (BuildContext context) {
+                      //TODO: Edit
+                    },
+                  ),
+                  SlidableAction(
+                    icon: Icons.delete,
+                    backgroundColor: Colors.red,
+                    onPressed: (BuildContext context) {
+                      //TODO: Remove
+                    },
+                  ),
+                ],
+              ),
               key: ValueKey(pair.value),
-              onDismissed: (direction) {
-                //TODO: Remove transaction in second account!
-                ref.read(transactionsProvider(pair.key).notifier)
-                    .remove(pair.value);
-              },
-              confirmDismiss: (direction) async {
-                return false;
-              },
-
-              background: Container(
-                color: Colors.red,
-                alignment: Alignment.centerLeft,
-                child: const Icon(
-                  Icons.delete,
-                  color: Colors.white,
-                ),
-              ),
-              secondaryBackground: Container(
-                color: Colors.red,
-                alignment: Alignment.centerRight,
-                child: const Icon(
-                  Icons.delete,
-                  color: Colors.white,
-                ),
-              ),
               child: TransactionWidget(
                 account: pair.key,
                 transaction: pair.value,

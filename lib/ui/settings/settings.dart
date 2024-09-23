@@ -6,8 +6,13 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const Placeholder(
-      child: Text("Settings"),
+    return Placeholder(
+      child: Center(
+        child: Text(
+          "Settings",
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
+      ),
     );
   }
 }

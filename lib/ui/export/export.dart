@@ -1,124 +1,215 @@
+import 'dart:convert';
 import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gnucash_mobile/core/models/account.dart';
-import 'package:gnucash_mobile/core/providers/accounts.dart';
 import 'package:gnucash_mobile/core/providers/transactions.dart';
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
-class ExportScreen extends ConsumerStatefulWidget {
+class ExportScreen extends ConsumerWidget {
   const ExportScreen({super.key});
 
   @override
-  _ExportState createState() => _ExportState();
-}
-
-class _ExportState extends ConsumerState<ExportScreen> {
-  String _directoryPath = "/";
-  String _directory = "/";
-
-  bool deleteTransactionsOnExport = false;
-
-  @override
-  void initState() {
-    if (Platform.isIOS) {
-      getApplicationDocumentsDirectory().then((value) {
-        _directoryPath = value.path;
-      });
-    }
-
-    super.initState();
-  }
-
-  void _selectFolder() {
-    FilePicker.platform.getDirectoryPath().then((value) {
-      if (value == null) {
-        return;
-      }
-      setState(() {
-        _directoryPath = value;
-        _directory = value.substring(value.lastIndexOf("/"));
-      });
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    String transactionCSV = ref.watch(transactionsCSVProvider);
-    // Remove 1 for header row, divide by 2 for double entry
-    final _numTransactions = ("\n".allMatches(transactionCSV).length - 1) / 2;
-    String _text = "${_numTransactions.toInt()} transaction(s)";
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Export Transactions"),
-      ),
-      body: Center(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0),
-              child: Platform.isIOS
-                  ? Text(
-                      "$_text will be written to this application's directory (/On My iPhone/GnuCashMobile)",
-                    )
-                  : Text("Export to: $_directory"),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Export your transactions to a file",
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-            Platform.isIOS
-                ? const SizedBox.shrink()
-                : TextButton(
-                    onPressed: () => _selectFolder(),
-                    child: const Text(
-                      "Pick directory",
+            Text(
+              "Here's what to do with it:",
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "1. ",
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                Expanded(
+                  child: Text(
+                    "Upload the file to your computer",
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "2. ",
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                Expanded(
+                  child: RichText(
+                    text: TextSpan(
+                      text: "In GnuCash, select ",
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      children: const [
+                        TextSpan(
+                          text:
+                              "File > Import > Import\u{00A0}Transactions\u{00A0}from\u{00A0}CSV",
+                          style: TextStyle(
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-            CheckboxListTile(
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0),
-              title: const Text('Delete transactions on successful export'),
-              value: deleteTransactionsOnExport,
-              onChanged: (value) {
-                if (value == null) {
-                  return;
-                }
-                setState(() {
-                  deleteTransactionsOnExport = value;
-                });
-              },
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () async {
-                final _yearMonthDay =
-                    DateFormat('yyyyMMdd').format(DateTime.now());
-                try {
-                  final _fileName =
-                      "$_directoryPath/${_yearMonthDay}_${DateTime.now().millisecond}.gnucash_transactions.csv";
-                  await File(_fileName).writeAsString(transactionCSV);
-
-                  if (deleteTransactionsOnExport) {
-                    for (Account account in ref.read(allAccountsProvider)) {
-                      ref.read(transactionsProvider(account).notifier).removeAll();
-                    }
-                  }
-
-                  Navigator.pop(context, true);
-                } catch (e) {
-                  print(e);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Error exporting!")),
-                  );
-                }
-              },
-              child: const Text(
-                "Export",
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "3. ",
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                Expanded(
+                  child: Text(
+                    "Select the file",
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "4. ",
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                Expanded(
+                  child: RichText(
+                    text: TextSpan(
+                      text: "In ",
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      children: const [
+                        TextSpan(
+                          text: "Load\u{00A0}and\u{00A0}Save\u{00A0}Settings",
+                          style: TextStyle(
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextSpan(
+                          text: ", select ",
+                        ),
+                        TextSpan(
+                          text: "\"GnuCash\u{00A0}Export\u{00A0}Format\"",
+                          style: TextStyle(
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const Spacer(),
+                OutlinedButton.icon(
+                  onPressed: () => saveToDownloads(context, ref),
+                  label: const Text("Save to Downloads"),
+                  icon: const Icon(Icons.download),
+                ),
+                const SizedBox(width: 16),
+                FilledButton.icon(
+                  onPressed: () => shareFile(context, ref),
+                  label: const Text("Share"),
+                  icon: const Icon(Icons.share),
+                ),
+              ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> saveToDownloads(BuildContext context, WidgetRef ref) async {
+    String csv = ref.read(transactionsCSVProvider);
+    final Directory? downloadsDir = await getDownloadsDirectory();
+    if (downloadsDir == null) {
+      if (!context.mounted) {
+        return;
+      }
+      showFailureSnackBar(context);
+      return;
+    }
+    final File file = File("${downloadsDir.path}/${DateFormat("y-m-d").format(DateTime.now())}-transactions.csv");
+    try {
+      await file.writeAsString(csv);
+    } catch (e, s) {
+      Logger().e("Failed to write to file", error: e, stackTrace: s);
+      if (!context.mounted) {
+        return;
+      }
+      showFailureSnackBar(context);
+      return;
+    }
+    if (!context.mounted) {
+      return;
+    }
+    showSuccessSnackBar(context);
+  }
+  Future<void> shareFile(BuildContext context, WidgetRef ref) async {
+    String csv = ref.read(transactionsCSVProvider);
+    ShareResult result = await Share.shareXFiles(
+      [
+        XFile.fromData(
+          utf8.encode(csv),
+          mimeType: "text/plain",
+          name: "transactions.csv",
+        ),
+      ],
+      subject: "GnuCash transactions",
+      fileNameOverrides: ["${DateFormat("y-m-d").format(DateTime.now())}-transactions.csv"],
+    );
+
+    bool success = result.status == ShareResultStatus.success;
+
+    if (!context.mounted) {
+      return;
+    }
+    success ? showSuccessSnackBar(context) : showFailureSnackBar(context);
+  }
+
+  Future<void> showSuccessSnackBar(BuildContext context) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Transactions exported successfully"),
+        behavior: SnackBarBehavior.floating,
+        showCloseIcon: true,
+      ),
+    );
+  }
+  Future<void> showFailureSnackBar(BuildContext context) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Failed to export transactions"),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        showCloseIcon: true,
+        closeIconColor: Colors.white,
       ),
     );
   }
