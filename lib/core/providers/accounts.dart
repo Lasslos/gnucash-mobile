@@ -11,7 +11,7 @@ part 'accounts.g.dart';
 
 /// Stores and exposes the accounts.
 @Riverpod(keepAlive: true)
-class RootAccountNodes extends _$RootAccountNodes {
+class AccountTree extends _$AccountTree {
   @override
   List<AccountNode> build() {
     ref.listenSelf((previous, next) {
@@ -68,8 +68,8 @@ class RootAccountNodes extends _$RootAccountNodes {
 }
 
 @riverpod
-List<Account> allAccounts(AllAccountsRef ref) {
-  Queue<AccountNode> accounts = Queue()..addAll(ref.watch(rootAccountNodesProvider));
+List<Account> accountList(AccountListRef ref) {
+  Queue<AccountNode> accounts = Queue()..addAll(ref.watch(accountTreeProvider));
   List<Account> allAccounts = [];
   while (accounts.isNotEmpty) {
     AccountNode accountNode = accounts.removeFirst();
@@ -81,7 +81,7 @@ List<Account> allAccounts(AllAccountsRef ref) {
 
 @riverpod
 List<Account> validTransactionAccounts(ValidTransactionAccountsRef ref) {
-  Queue<AccountNode> accounts = Queue()..addAll(ref.watch(rootAccountNodesProvider));
+  Queue<AccountNode> accounts = Queue()..addAll(ref.watch(accountTreeProvider));
   List<Account> validAccounts = [];
   while (accounts.isNotEmpty) {
     AccountNode accountNode = accounts.removeFirst();

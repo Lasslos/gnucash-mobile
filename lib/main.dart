@@ -21,7 +21,7 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    bool hasImportedAccounts = ref.read(rootAccountNodesProvider).isNotEmpty;
+    bool hasImportedAccounts = ref.read(accountTreeProvider).isNotEmpty;
 
     return MaterialApp(
       title: "GnuCash Refined",

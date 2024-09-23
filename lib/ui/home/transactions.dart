@@ -25,7 +25,7 @@ class TransactionsView extends ConsumerWidget {
     // Otherwise, show only those belonging to the selected account node.
     if (accountNode == null) {
       Queue<AccountNode> queue = Queue<AccountNode>()
-        ..addAll(ref.watch(rootAccountNodesProvider));
+        ..addAll(ref.watch(accountTreeProvider));
       while (queue.isNotEmpty) {
         AccountNode current = queue.removeFirst();
         List<Transaction> currentTransactions =

@@ -223,7 +223,7 @@ class ImportPage extends ConsumerWidget {
 
     try {
       File file = File(result.files.single.path!);
-      ref.read(rootAccountNodesProvider.notifier).setCSV(
+      ref.read(accountTreeProvider.notifier).setCSV(
             await file.readAsString(),
           );
     } catch (e) {
@@ -238,7 +238,7 @@ class ImportPage extends ConsumerWidget {
       return;
     }
 
-    List<AccountNode> accountNodes = ref.watch(rootAccountNodesProvider);
+    List<AccountNode> accountNodes = ref.watch(accountTreeProvider);
     if (accountNodes.isEmpty) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -268,7 +268,7 @@ class ApprovePage extends ConsumerWidget {
       return node;
     }
 
-    List<AccountNode> accountNodes = ref.watch(rootAccountNodesProvider);
+    List<AccountNode> accountNodes = ref.watch(accountTreeProvider);
     accountTree.addAll(accountNodes.map(buildAccountTree));
 
     return Scaffold(
@@ -327,7 +327,7 @@ class ApprovePage extends ConsumerWidget {
             const Spacer(),
             FilledButton.tonal(
               onPressed: () {
-                ref.read(rootAccountNodesProvider.notifier).clear();
+                ref.read(accountTreeProvider.notifier).clear();
                 ref.read(introStateProvider.notifier).state = 1;
               },
               child: const Text('Retry'),

@@ -22,7 +22,7 @@ class AccountsScreen extends ConsumerWidget {
       return node;
     }
 
-    List<AccountNode> accountNodes = ref.watch(rootAccountNodesProvider);
+    List<AccountNode> accountNodes = ref.watch(accountTreeProvider);
     accountTree.addAll(accountNodes.map(buildAccountTree));
 
     return SafeArea(

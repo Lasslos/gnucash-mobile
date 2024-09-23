@@ -84,7 +84,7 @@ String transactionsCSV(TransactionsCSVRef ref) {
     ..add(csvHeader);
 
   List<MapEntry<Account, Transaction>> transactions = [];
-  List<Account> accounts = ref.watch(allAccountsProvider);
+  List<Account> accounts = ref.watch(accountListProvider);
   // Iterate over all accounts and collect the transactions
   for (Account account in accounts) {
     List<Transaction> currentTransactions = ref.watch(transactionsProvider(account));
