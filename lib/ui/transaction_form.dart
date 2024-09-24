@@ -47,7 +47,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
       locale: Localizations.localeOf(context).toString(),
     );
     List<Account> validTransactionAccounts =
-        ref.watch(validTransactionAccountsProvider);
+        ref.watch(transactionAccountListProvider);
     Account? favoriteDebitAccount = ref.watch(favoriteDebitAccountProvider);
     Account? favoriteCreditAccount = ref.watch(favoriteCreditAccountProvider);
 

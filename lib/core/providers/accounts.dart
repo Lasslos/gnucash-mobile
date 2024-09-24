@@ -78,7 +78,7 @@ List<Account> accountList(AccountListRef ref) {
 }
 
 @riverpod
-List<Account> validTransactionAccounts(ValidTransactionAccountsRef ref) {
+List<Account> transactionAccountList(TransactionAccountListRef ref) {
   return ref.watch(accountListProvider).where((account) => !account.placeholder).toList();
 }
 

@@ -10,7 +10,7 @@ class Favorites extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     List<Account> validTransactionAccounts =
-        ref.watch(validTransactionAccountsProvider);
+        ref.watch(transactionAccountListProvider);
     Account? favoriteDebitAccount = ref.watch(favoriteDebitAccountProvider);
     Account? favoriteCreditAccount = ref.watch(favoriteCreditAccountProvider);
 
