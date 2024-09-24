@@ -1,4 +1,3 @@
-import 'package:dart_extensions_methods/dart_extension_methods.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -27,20 +26,6 @@ class TransactionsView extends ConsumerWidget {
   }
 }
 
-class _AccountTransactionPair {
-  final Account account;
-  final Transaction transaction;
-
-  _AccountTransactionPair(this.account, this.transaction);
-}
-
-class _DoubleEntryTransaction {
-  final _AccountTransactionPair first;
-  final _AccountTransactionPair second;
-
-  _DoubleEntryTransaction(this.first, this.second);
-}
-
 class _GlobalTransactionsView extends ConsumerWidget {
   const _GlobalTransactionsView({super.key});
 
@@ -51,24 +36,24 @@ class _GlobalTransactionsView extends ConsumerWidget {
       transactions[account] = ref.watch(transactionsProvider(account));
     }
 
-    List<_DoubleEntryTransaction> doubleEntryTransactions = [];
-    Map<String, List<_AccountTransactionPair>> transactionsById = {};
+    List<DoubleEntryTransaction> doubleEntryTransactions = [];
+    Map<String, List<AccountTransactionPair>> transactionsById = {};
     for (Account account in transactions.keys) {
       for (Transaction transaction in transactions[account]!) {
         transactionsById.putIfAbsent(transaction.id, () => []);
         transactionsById[transaction.id]!.add(
-          _AccountTransactionPair(
+          AccountTransactionPair(
             transactions.keys.firstWhere((element) => transactions[element]!.contains(transaction)),
             transaction,
           ),
         );
       }
     }
-    for (List<_AccountTransactionPair> pairs in transactionsById.values) {
+    for (List<AccountTransactionPair> pairs in transactionsById.values) {
       if (pairs.length != 2) {
         Logger().w("Transaction with id ${pairs.first.transaction.id} has ${pairs.length} entries, expected 2");
       } else {
-        doubleEntryTransactions.add(_DoubleEntryTransaction(pairs[0], pairs[1]));
+        doubleEntryTransactions.add(DoubleEntryTransaction(pairs[0], pairs[1]));
       }
     }
     doubleEntryTransactions.sort(
@@ -77,7 +62,7 @@ class _GlobalTransactionsView extends ConsumerWidget {
 
     return ListView(
       children: [
-        for (_DoubleEntryTransaction doubleEntryTransaction in doubleEntryTransactions)
+        for (DoubleEntryTransaction doubleEntryTransaction in doubleEntryTransactions)
           TransactionSlidable(
             key: ValueKey(doubleEntryTransaction.first.transaction),
             child: DoubleEntryTransactionWidget(doubleEntryTransaction: doubleEntryTransaction),
@@ -230,7 +215,7 @@ class TransactionWidget extends StatelessWidget {
 class DoubleEntryTransactionWidget extends StatelessWidget {
   const DoubleEntryTransactionWidget({required this.doubleEntryTransaction, super.key});
 
-  final _DoubleEntryTransaction doubleEntryTransaction;
+  final DoubleEntryTransaction doubleEntryTransaction;
 
   @override
   Widget build(BuildContext context) {
@@ -245,20 +230,22 @@ class DoubleEntryTransactionWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: Row(
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                doubleEntryTransaction.first.transaction.description,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              Text(
-                subtitle,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
+          SizedBox(
+            width: 130,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  doubleEntryTransaction.first.transaction.description,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
           ),
-          const SizedBox(width: 16),
           Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,21 +265,21 @@ class DoubleEntryTransactionWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                transaction.amount.toStringAsFixed(2),
+                (transaction.amount.isNegative ? "" : "+") +transaction.amount.toStringAsFixed(2),
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: transaction.amount.isNegative ? Colors.red : null,
+                  color: transaction.amount.isNegative ? Colors.red : Colors.green,
                 ),
               ),
               Text(
-                otherTransaction.amount.toStringAsFixed(2),
+              (otherTransaction.amount.isNegative ? "" : "+") + otherTransaction.amount.toStringAsFixed(2),
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: otherTransaction.amount.isNegative ? Colors.red : null,
+                  color: otherTransaction.amount.isNegative ? Colors.red : Colors.green,
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );

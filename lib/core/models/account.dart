@@ -3,6 +3,7 @@ import 'package:csv/csv_settings_autodetection.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gnucash_mobile/core/models/account_type.dart';
+import 'package:gnucash_mobile/core/models/transaction.dart';
 import 'package:logger/logger.dart';
 
 part 'account.freezed.dart';
@@ -43,15 +44,12 @@ class Account with _$Account {
 
     /// `true` if the account should not be used for transactions.
     required bool placeholder,
-
     String? code,
-
     String? description,
 
     /// Color in ----- format. If empty, use #f0ecec.
     /// TODO: Add format and parsing for color.
     @Deprecated("Unfinished feature") String? color,
-
     String? notes,
   }) = _Account;
 
@@ -61,8 +59,7 @@ class Account with _$Account {
 
   String get parentFullName => fullName.substring(0, fullName.lastIndexOf(':'));
 
-  factory Account.fromJson(Map<String, dynamic> json) =>
-      _$AccountFromJson(json);
+  factory Account.fromJson(Map<String, dynamic> json) => _$AccountFromJson(json);
 }
 
 /// Parse a CSV string into a list of accounts.
@@ -152,4 +149,20 @@ class AccountParsingException implements Exception {
   String toString() {
     return 'AccountParsingException: $message';
   }
+}
+
+@freezed
+class AccountTransactionPair with _$AccountTransactionPair {
+  factory AccountTransactionPair(
+    Account account,
+    Transaction transaction,
+  ) = _AccountTransactionPair;
+}
+
+@freezed
+class DoubleEntryTransaction with _$DoubleEntryTransaction {
+  factory DoubleEntryTransaction(
+    AccountTransactionPair first,
+    AccountTransactionPair second,
+  ) = _DoubleEntryTransaction;
 }
