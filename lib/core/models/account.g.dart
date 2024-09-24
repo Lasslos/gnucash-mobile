@@ -8,7 +8,7 @@ part of 'account.dart';
 
 _$AccountImpl _$$AccountImplFromJson(Map<String, dynamic> json) =>
     _$AccountImpl(
-      type: json['type'] as String,
+      type: AccountType.fromJson(json['type'] as String),
       fullName: json['fullName'] as String,
       name: json['name'] as String,
       symbol: json['symbol'] as String,

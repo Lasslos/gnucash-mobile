@@ -10,14 +10,14 @@ import 'package:gnucash_mobile/core/models/account_node.dart';
 import 'package:gnucash_mobile/core/providers/accounts.dart';
 import 'package:gnucash_mobile/ui/home/home.dart';
 import 'package:gnucash_mobile/ui/intro/intro_state.dart';
+import 'package:gnucash_mobile/utils.dart';
 
 class IntroScreen extends ConsumerWidget {
   const IntroScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => PageTransitionSwitcher(
-        transitionBuilder: (child, animation, secondaryAnimation) =>
-            SharedAxisTransition(
+        transitionBuilder: (child, animation, secondaryAnimation) => SharedAxisTransition(
           animation: animation,
           secondaryAnimation: secondaryAnimation,
           transitionType: SharedAxisTransitionType.horizontal,
@@ -150,8 +150,7 @@ class ImportPage extends ConsumerWidget {
                                     text: 'Choose ',
                                   ),
                                   TextSpan(
-                                    text:
-                                        'File > Export > Export\u{00A0}Account\u{00A0}Tree\u{00A0}to\u{00A0}CSV',
+                                    text: 'File > Export > Export\u{00A0}Account\u{00A0}Tree\u{00A0}to\u{00A0}CSV',
                                     style: TextStyle(
                                       fontStyle: FontStyle.italic,
                                     ),
@@ -220,12 +219,29 @@ class ImportPage extends ConsumerWidget {
       }
       return;
     }
-
+    List<AccountNode> accountNodes;
     try {
       File file = File(result.files.single.path!);
-      ref.read(accountTreeProvider.notifier).setCSV(
+      await ref.read(accountTreeProvider.notifier).setCSV(
             await file.readAsString(),
           );
+      accountNodes = ref.watch(accountTreeProvider);
+    } on AccountParsingException catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text(
+              e.message,
+              style: const TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -238,14 +254,12 @@ class ImportPage extends ConsumerWidget {
       return;
     }
 
-    List<AccountNode> accountNodes = ref.watch(accountTreeProvider);
     if (accountNodes.isEmpty) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             behavior: SnackBarBehavior.floating,
-            content:
-                Text('No accounts were imported. Is this the correct file?'),
+            content: Text('No accounts were imported. Is this the correct file?'),
           ),
         );
       }
@@ -263,8 +277,7 @@ class ApprovePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     TreeNode<Account> accountTree = TreeNode<Account>.root();
     TreeNode<Account> buildAccountTree(AccountNode account) {
-      TreeNode<Account> node = TreeNode<Account>(data: account.account)
-        ..addAll(account.children.map(buildAccountTree));
+      TreeNode<Account> node = TreeNode<Account>(data: account.account)..addAll(account.children.map(buildAccountTree));
       return node;
     }
 
@@ -312,7 +325,7 @@ class ApprovePage extends ConsumerWidget {
                 }
                 return ListTile(
                   title: Text(item.data?.name ?? "Empty title"),
-                  subtitle: Text(item.data?.description ?? ""),
+                  subtitle: Text(item.data?.type.toJson().capitalizeAndLower() ?? "Empty type"),
                 );
               },
               showRootNode: false,

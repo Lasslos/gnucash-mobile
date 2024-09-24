@@ -2,6 +2,7 @@ import 'package:csv/csv.dart';
 import 'package:csv/csv_settings_autodetection.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:gnucash_mobile/core/models/account_type.dart';
 import 'package:logger/logger.dart';
 
 part 'account.freezed.dart';
@@ -16,9 +17,7 @@ part 'account.g.dart';
 class Account with _$Account {
   const factory Account({
     /// The type of the account.
-    ///
-    /// Example: `ASSET`, `LIABILITY`, `EQUITY`, `INCOME`, `EXPENSE`
-    required String type,
+    required AccountType type,
 
     /// Fully qualified account name, separated by colons.
     ///
@@ -83,7 +82,8 @@ List<Account> parseAccountCSV(String csvString) {
   }
   for (int i = 1; i < csv.length; i++) {
     try {
-      String type = csv[i][0];
+      AccountType type = AccountType.fromJson(csv[i][0]);
+
       String fullName = csv[i][1];
       String name = csv[i][2];
       assert(fullName.endsWith(name), "Full name must end with name");
@@ -111,6 +111,7 @@ List<Account> parseAccountCSV(String csvString) {
       bool hidden = csv[i][9] == "T";
       bool tax = csv[i][10] == "T";
       bool placeholder = csv[i][11] == "T";
+
       accounts.add(
         Account(
           type: type,

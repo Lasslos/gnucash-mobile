@@ -1,5 +1,10 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'account_type.g.dart';
+
 /// The account type.
 /// See [GnuCash Source](https://github.com/Gnucash/gnucash/blob/5.8/libgnucash/engine/Account.h)
+@JsonEnum(alwaysCreate: true, fieldRename: FieldRename.screamingSnake)
 enum AccountType {
   /// The bank account type denotes a savings
   /// or checking account held at a bank.
@@ -78,5 +83,9 @@ enum AccountType {
   /// accounts to make the transaction balance in each
   /// commodity as well as in total value.
   @Deprecated("Trading accounts are not supported")
-  trading,
+  trading;
+
+
+  String toJson() => _$AccountTypeEnumMap[this]!;
+  factory AccountType.fromJson(String json) => _$AccountTypeEnumMap.entries.firstWhere((entry) => entry.value == json).key;
 }

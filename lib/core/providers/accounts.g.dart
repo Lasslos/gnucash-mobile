@@ -6,7 +6,7 @@ part of 'accounts.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$accountListHash() => r'49cd6b9f1609e78d4c127decef69b20c268e519e';
+String _$accountListHash() => r'5ee1d97fecf2c2bf7f60234ceed97157e7f3f453';
 
 /// See also [accountList].
 @ProviderFor(accountList)
@@ -21,7 +21,7 @@ final accountListProvider = AutoDisposeProvider<List<Account>>.internal(
 
 typedef AccountListRef = AutoDisposeProviderRef<List<Account>>;
 String _$validTransactionAccountsHash() =>
-    r'8d9f6f7f91b0e5280bdaa50093cf5ebb27c90cfa';
+    r'7cbbacd43a55ccc5207773ce783b9af653b3ce9a';
 
 /// See also [validTransactionAccounts].
 @ProviderFor(validTransactionAccounts)

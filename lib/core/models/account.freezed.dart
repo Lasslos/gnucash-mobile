@@ -21,9 +21,7 @@ Account _$AccountFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$Account {
   /// The type of the account.
-  ///
-  /// Example: `ASSET`, `LIABILITY`, `EQUITY`, `INCOME`, `EXPENSE`
-  String get type => throw _privateConstructorUsedError;
+  AccountType get type => throw _privateConstructorUsedError;
 
   /// Fully qualified account name, separated by colons.
   ///
@@ -73,7 +71,7 @@ abstract class $AccountCopyWith<$Res> {
       _$AccountCopyWithImpl<$Res, Account>;
   @useResult
   $Res call(
-      {String type,
+      {AccountType type,
       String fullName,
       String name,
       String symbol,
@@ -119,7 +117,7 @@ class _$AccountCopyWithImpl<$Res, $Val extends Account>
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
-              as String,
+              as AccountType,
       fullName: null == fullName
           ? _value.fullName
           : fullName // ignore: cast_nullable_to_non_nullable
@@ -176,7 +174,7 @@ abstract class _$$AccountImplCopyWith<$Res> implements $AccountCopyWith<$Res> {
   @override
   @useResult
   $Res call(
-      {String type,
+      {AccountType type,
       String fullName,
       String name,
       String symbol,
@@ -220,7 +218,7 @@ class __$$AccountImplCopyWithImpl<$Res>
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
-              as String,
+              as AccountType,
       fullName: null == fullName
           ? _value.fullName
           : fullName // ignore: cast_nullable_to_non_nullable
@@ -291,10 +289,8 @@ class _$AccountImpl extends _Account with DiagnosticableTreeMixin {
       _$$AccountImplFromJson(json);
 
   /// The type of the account.
-  ///
-  /// Example: `ASSET`, `LIABILITY`, `EQUITY`, `INCOME`, `EXPENSE`
   @override
-  final String type;
+  final AccountType type;
 
   /// Fully qualified account name, separated by colons.
   ///
@@ -410,7 +406,7 @@ class _$AccountImpl extends _Account with DiagnosticableTreeMixin {
 
 abstract class _Account extends Account {
   const factory _Account(
-      {required final String type,
+      {required final AccountType type,
       required final String fullName,
       required final String name,
       required final String symbol,
@@ -427,10 +423,8 @@ abstract class _Account extends Account {
   factory _Account.fromJson(Map<String, dynamic> json) = _$AccountImpl.fromJson;
 
   /// The type of the account.
-  ///
-  /// Example: `ASSET`, `LIABILITY`, `EQUITY`, `INCOME`, `EXPENSE`
   @override
-  String get type;
+  AccountType get type;
 
   /// Fully qualified account name, separated by colons.
   ///
