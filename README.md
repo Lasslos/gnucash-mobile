@@ -1,5 +1,10 @@
 # GnuCash Mobile
 
+### Important source for development:
+- https://wiki.gnucash.org/docs/C/gnucash-manual.pdf
+
+---
+
 An application for keeping track of GnuCash transactions on the go.
 
 Note: this app is not meant to be a standalone implementation of GnuCash. Rather, it's a simple tool for recording transactions as they happen that also allows you to export in a GnuCash-compatible format (CSV).

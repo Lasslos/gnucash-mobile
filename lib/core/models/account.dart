@@ -64,8 +64,9 @@ class Account with _$Account {
 
 /// Parse a CSV string into a list of accounts.
 ///
+/// Returns Accounts and a String List of non-parseable lines.
 /// Throws an [AccountParsingException] if an error occurs.
-List<Account> parseAccountCSV(String csvString) {
+MapEntry<List<Account>, List<List<String>>> parseAccountCSV(String csvString) {
   const detector = FirstOccurrenceSettingsDetector(
     eols: ['\r\n', '\n'],
   );
@@ -74,8 +75,11 @@ List<Account> parseAccountCSV(String csvString) {
     shouldParseNumbers: false,
   ).convert(csvString);
   List<Account> accounts = [];
+  List<List<String>> nonParseable = [];
+  String errorMessage = "CSV is empty";
+
   if (csv.length <= 1) {
-    return accounts;
+    return MapEntry(accounts, nonParseable);
   }
   for (int i = 1; i < csv.length; i++) {
     try {
@@ -126,18 +130,20 @@ List<Account> parseAccountCSV(String csvString) {
         ),
       );
     } catch (e, s) {
-      Logger().e(
+      Logger().w(
         "Error parsing account CSV",
         time: DateTime.now(),
         error: e,
         stackTrace: s,
       );
-      throw AccountParsingException(
-        "Error parsing account CSV at line ${i + 1}",
-      );
+      nonParseable.add(csv[i]);
+      errorMessage = e.toString();
     }
   }
-  return accounts;
+  if (accounts.isEmpty) {
+    throw AccountParsingException("Zero accounts parsed: $errorMessage");
+  }
+  return MapEntry(accounts, nonParseable);
 }
 
 class AccountParsingException implements Exception {

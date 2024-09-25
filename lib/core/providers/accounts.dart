@@ -41,8 +41,14 @@ class AccountTree extends _$AccountTree {
     );
   }
 
-  Future<void> setCSV(String csv) async {
-    List<Account> accounts = parseAccountCSV(csv);
+  /// Set the accounts from a CSV string.
+  ///
+  /// Returns A list of non-parseable lines.
+  /// Throws [AccountParsingException] if the CSV is not valid.
+  Future<List<List<String>>> setCSV(String csv) async {
+    MapEntry<List<Account>, List<List<String>>> accountsAndNonParsable = parseAccountCSV(csv);
+    List<Account> accounts = accountsAndNonParsable.key;
+    List<List<String>> nonParseable = accountsAndNonParsable.value;
     Map<String, AccountNode> lookup = {};
 
     // Build hierarchical accounts
@@ -52,6 +58,10 @@ class AccountTree extends _$AccountTree {
     List<AccountNode> hierarchicalAccounts = [];
     for (Account account in accounts) {
       if (account.hasParent()) {
+        AccountNode? parent = lookup[account.parentFullName];
+        if (parent == null) {
+          throw AccountParsingException('Parent account not found: ${account.parentFullName}');
+        }
         lookup[account.parentFullName]!.children.add(lookup[account.fullName]!);
       } else {
         hierarchicalAccounts.add(lookup[account.fullName]!);
@@ -59,6 +69,7 @@ class AccountTree extends _$AccountTree {
     }
 
     state = List.unmodifiable(hierarchicalAccounts);
+    return nonParseable;
   }
 
   Future<void> clear() async {

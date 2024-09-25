@@ -1,12 +1,13 @@
-Typ,Volle Kontobezeichnung,Kontobezeichnung,Kontonummer,Beschreibung,Kontofarbe,Bemerkungen,Symbol,Namensraum,Versteckt,Steuerrelevante Information,Platzhalter
+Type,Full Account Name,Account Name,Account Code,Description,Account Color,Notes,Symbol,Namespace,Hidden,Tax Info,Placeholder
 ASSET,Aktiva,Aktiva,,Aktiva,,,EUR,CURRENCY,F,F,T
 ASSET,Aktiva:Barvermögen,Barvermögen,,Barvermögen,,,EUR,CURRENCY,F,F,T
+broken
 CASH,Aktiva:Barvermögen:Bargeld,Bargeld,,Bargeld,,,EUR,CURRENCY,F,F,F
 BANK,Aktiva:Barvermögen:Girokonto,Girokonto,,Girokonto,,,EUR,CURRENCY,F,F,F
 BANK,Aktiva:Barvermögen:Sparkonto,Sparkonto,,Sparkonto,,,EUR,CURRENCY,F,F,F
 LIABILITY,Fremdkapital,Fremdkapital,,alle Verbindlichkeiten,,,EUR,CURRENCY,F,F,T
 LIABILITY,Fremdkapital:Barverbindlichkeiten,Barverbindlichkeiten,,Barverbindlichkeiten (noch offenstehende Rechnungen),,,EUR,CURRENCY,F,F,T
-CREDIT,Fremdkapital:Barverbindlichkeiten:Kreditkarte,Kreditkarte,,Kreditkarte,,,EUR,CURRENCY,F,F,F
+wrong_type,Fremdkapital:Barverbindlichkeiten:Kreditkarte,Kreditkarte,,Kreditkarte,,,EUR,CURRENCY,F,F,F
 LIABILITY,Fremdkapital:Kredite,Kredite,,Kredite,,,EUR,CURRENCY,F,F,T
 INCOME,Erträge,Erträge,,Erträge,,,EUR,CURRENCY,F,F,T
 INCOME,Erträge:Gehalt,Gehalt,,Gehalt und Zulagen,,,EUR,CURRENCY,F,F,T

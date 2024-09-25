@@ -23,7 +23,7 @@ class IntroScreen extends ConsumerWidget {
           transitionType: SharedAxisTransitionType.horizontal,
           child: child,
         ),
-        child: switch (ref.watch(introStateProvider)) {
+        child: switch (ref.watch(introStateNProvider.select((state) => state.currentIndex))) {
           0 => const WelcomePage(),
           1 => const ImportPage(),
           2 => const ApprovePage(),
@@ -74,7 +74,7 @@ class WelcomePage extends ConsumerWidget {
               const Spacer(),
               FilledButton(
                 onPressed: () {
-                  ref.read(introStateProvider.notifier).state = 1;
+                  ref.read(introStateNProvider.notifier).currentIndex = 1;
                 },
                 child: const Text('Get started'),
               ),
@@ -220,11 +220,12 @@ class ImportPage extends ConsumerWidget {
       return;
     }
     List<AccountNode> accountNodes;
+    List<List<String>> errors;
     try {
       File file = File(result.files.single.path!);
-      await ref.read(accountTreeProvider.notifier).setCSV(
-            await file.readAsString(),
-          );
+      errors = await ref.read(accountTreeProvider.notifier).setCSV(
+        await file.readAsString(),
+      );
       accountNodes = ref.watch(accountTreeProvider);
     } on AccountParsingException catch (e) {
       if (context.mounted) {
@@ -254,19 +255,10 @@ class ImportPage extends ConsumerWidget {
       return;
     }
 
-    if (accountNodes.isEmpty) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            behavior: SnackBarBehavior.floating,
-            content: Text('No accounts were imported. Is this the correct file?'),
-          ),
-        );
-      }
-      return;
-    }
-
-    ref.read(introStateProvider.notifier).state = 2;
+    // Importing throws if accountNodes is empty.
+    assert(accountNodes.isNotEmpty, "accountNodes must not be empty");
+    ref.read(introStateNProvider.notifier).nonParsableAccounts = errors.map((error) => "[" + error.join(', ') + "]").toList();
+    ref.read(introStateNProvider.notifier).currentIndex = 2;
   }
 }
 
@@ -283,6 +275,8 @@ class ApprovePage extends ConsumerWidget {
 
     List<AccountNode> accountNodes = ref.watch(accountTreeProvider);
     accountTree.addAll(accountNodes.map(buildAccountTree));
+
+    List<String> nonParsableAccounts = ref.watch(introStateNProvider.select((state) => state.nonParsableAccounts));
 
     return Scaffold(
       body: SafeArea(
@@ -331,6 +325,31 @@ class ApprovePage extends ConsumerWidget {
               showRootNode: false,
               tree: accountTree,
             ),
+            if (nonParsableAccounts.isNotEmpty) SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      'These accounts are not yet supported:',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  ...nonParsableAccounts.map(
+                        (account) => Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: Text(
+                            account,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ),
+                      ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -341,7 +360,7 @@ class ApprovePage extends ConsumerWidget {
             FilledButton.tonal(
               onPressed: () {
                 ref.read(accountTreeProvider.notifier).clear();
-                ref.read(introStateProvider.notifier).state = 1;
+                ref.read(introStateNProvider.notifier).currentIndex = 1;
               },
               child: const Text('Retry'),
             ),

@@ -9,83 +9,47 @@ enum AccountType {
   /// The bank account type denotes a savings
   /// or checking account held at a bank.
   /// Often interest bearing.
-  bank,
+  bank("Deposit", "Withdrawal"),
 
   /// The cash account type is used to denote a
   /// shoe-box or pillowcase stuffed with *
   /// cash.
-  cash,
+  cash("Receive", "Spend"),
 
   /// The Credit card account is used to denote
   /// credit (e.g. amex) and debit (e.g. visa,
   /// mastercard) card accounts
-  credit,
+  credit("Payment", "Charge"),
 
   /// asset (and liability) accounts indicate
   /// generic, generalized accounts that are
   /// none of the above.
-  asset,
+  asset("Increase", "Decrease"),
 
   /// liability (and asset) accounts indicate
   /// generic, generalized accounts that are
   /// none of the above.
-  liability,
-
-  /// Stock accounts will typically be shown in
-  /// registers which show three columns:
-  /// price, number of shares, and value.
-  @Deprecated("Stock accounts are not supported")
-  stock,
-
-  /// Mutual Fund accounts will typically be
-  /// shown in registers which show three
-  /// columns: price, number of shares, and
-  /// value.
-  mutual,
-
-  /// The currency account type indicates that
-  /// the account is a currency trading
-  /// account.  In many ways, a currency
-  /// trading account is like a stock *
-  /// trading account. It is shown in the
-  /// register with three columns: price,
-  /// number of shares, and value. Note:
-  /// Since version 1.7.0, this account is *
-  /// no longer needed to exchange currencies
-  /// between accounts, so this type is
-  /// DEPRECATED.
-  @Deprecated("Currency accounts are not supported")
-  currency,
+  liability("Decrease", "Increase"),
 
   /// Income accounts are used to denote
   /// income
-  income,
+  income("Charge", "Income"),
 
   /// Expense accounts are used to denote
   /// expenses.
-  expense,
+  expense("Expense", "Rebate"),
 
   /// Equity account is used to balance the
   /// balance sheet.
-  equity,
+  equity("Decrease", "Increase");
 
-  /// A/R account type
-  @Deprecated("A/R accounts are not supported")
-  receivable,
-
-  /// A/P account type
-  @Deprecated("A/P accounts are not supported")
-  payable,
-
-  /// Account used to record multiple commodity transactions.
-  /// This is not the same as CURRENCY above.
-  /// Multiple commodity transactions have splits in these
-  /// accounts to make the transaction balance in each
-  /// commodity as well as in total value.
-  @Deprecated("Trading accounts are not supported")
-  trading;
-
+  const AccountType(this.debitName, this.creditName);
+  final String debitName;
+  final String creditName;
 
   String toJson() => _$AccountTypeEnumMap[this]!;
-  factory AccountType.fromJson(String json) => _$AccountTypeEnumMap.entries.firstWhere((entry) => entry.value == json).key;
+  factory AccountType.fromJson(String json) => _$AccountTypeEnumMap.entries.firstWhere(
+    (entry) => entry.value == json,
+    orElse: () => throw ArgumentError.value(json, 'json', 'Invalid JSON value for AccountType'),
+  ).key;
 }
