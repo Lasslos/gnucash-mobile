@@ -20,24 +20,24 @@ final accountListProvider = AutoDisposeProvider<List<Account>>.internal(
 );
 
 typedef AccountListRef = AutoDisposeProviderRef<List<Account>>;
-String _$validTransactionAccountsHash() =>
-    r'7cbbacd43a55ccc5207773ce783b9af653b3ce9a';
+String _$transactionAccountListHash() =>
+    r'3b4528bafbc07821b26693b171cb3f57e37ba643';
 
-/// See also [validTransactionAccounts].
-@ProviderFor(validTransactionAccounts)
-final validTransactionAccountsProvider =
+/// See also [transactionAccountList].
+@ProviderFor(transactionAccountList)
+final transactionAccountListProvider =
     AutoDisposeProvider<List<Account>>.internal(
-  validTransactionAccounts,
-  name: r'validTransactionAccountsProvider',
+  transactionAccountList,
+  name: r'transactionAccountListProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$validTransactionAccountsHash,
+      : _$transactionAccountListHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef ValidTransactionAccountsRef = AutoDisposeProviderRef<List<Account>>;
-String _$accountTreeHash() => r'20177a930623a9ba1cc7e4f13e39b1c9f46cc9df';
+typedef TransactionAccountListRef = AutoDisposeProviderRef<List<Account>>;
+String _$accountTreeHash() => r'30a9b40485f0d4a045dfa140c34b8c9fb298c933';
 
 /// Stores and exposes the accounts.
 ///

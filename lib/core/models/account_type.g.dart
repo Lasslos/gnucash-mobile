@@ -12,13 +12,7 @@ const _$AccountTypeEnumMap = {
   AccountType.credit: 'CREDIT',
   AccountType.asset: 'ASSET',
   AccountType.liability: 'LIABILITY',
-  AccountType.stock: 'STOCK',
-  AccountType.mutual: 'MUTUAL',
-  AccountType.currency: 'CURRENCY',
   AccountType.income: 'INCOME',
   AccountType.expense: 'EXPENSE',
   AccountType.equity: 'EQUITY',
-  AccountType.receivable: 'RECEIVABLE',
-  AccountType.payable: 'PAYABLE',
-  AccountType.trading: 'TRADING',
 };

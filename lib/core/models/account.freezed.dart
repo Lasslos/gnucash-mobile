@@ -477,3 +477,383 @@ abstract class _Account extends Account {
   _$$AccountImplCopyWith<_$AccountImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
+
+/// @nodoc
+mixin _$AccountTransactionPair {
+  Account get account => throw _privateConstructorUsedError;
+  Transaction get transaction => throw _privateConstructorUsedError;
+
+  /// Create a copy of AccountTransactionPair
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $AccountTransactionPairCopyWith<AccountTransactionPair> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $AccountTransactionPairCopyWith<$Res> {
+  factory $AccountTransactionPairCopyWith(AccountTransactionPair value,
+          $Res Function(AccountTransactionPair) then) =
+      _$AccountTransactionPairCopyWithImpl<$Res, AccountTransactionPair>;
+  @useResult
+  $Res call({Account account, Transaction transaction});
+
+  $AccountCopyWith<$Res> get account;
+  $TransactionCopyWith<$Res> get transaction;
+}
+
+/// @nodoc
+class _$AccountTransactionPairCopyWithImpl<$Res,
+        $Val extends AccountTransactionPair>
+    implements $AccountTransactionPairCopyWith<$Res> {
+  _$AccountTransactionPairCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of AccountTransactionPair
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? account = null,
+    Object? transaction = null,
+  }) {
+    return _then(_value.copyWith(
+      account: null == account
+          ? _value.account
+          : account // ignore: cast_nullable_to_non_nullable
+              as Account,
+      transaction: null == transaction
+          ? _value.transaction
+          : transaction // ignore: cast_nullable_to_non_nullable
+              as Transaction,
+    ) as $Val);
+  }
+
+  /// Create a copy of AccountTransactionPair
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $AccountCopyWith<$Res> get account {
+    return $AccountCopyWith<$Res>(_value.account, (value) {
+      return _then(_value.copyWith(account: value) as $Val);
+    });
+  }
+
+  /// Create a copy of AccountTransactionPair
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $TransactionCopyWith<$Res> get transaction {
+    return $TransactionCopyWith<$Res>(_value.transaction, (value) {
+      return _then(_value.copyWith(transaction: value) as $Val);
+    });
+  }
+}
+
+/// @nodoc
+abstract class _$$AccountTransactionPairImplCopyWith<$Res>
+    implements $AccountTransactionPairCopyWith<$Res> {
+  factory _$$AccountTransactionPairImplCopyWith(
+          _$AccountTransactionPairImpl value,
+          $Res Function(_$AccountTransactionPairImpl) then) =
+      __$$AccountTransactionPairImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({Account account, Transaction transaction});
+
+  @override
+  $AccountCopyWith<$Res> get account;
+  @override
+  $TransactionCopyWith<$Res> get transaction;
+}
+
+/// @nodoc
+class __$$AccountTransactionPairImplCopyWithImpl<$Res>
+    extends _$AccountTransactionPairCopyWithImpl<$Res,
+        _$AccountTransactionPairImpl>
+    implements _$$AccountTransactionPairImplCopyWith<$Res> {
+  __$$AccountTransactionPairImplCopyWithImpl(
+      _$AccountTransactionPairImpl _value,
+      $Res Function(_$AccountTransactionPairImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of AccountTransactionPair
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? account = null,
+    Object? transaction = null,
+  }) {
+    return _then(_$AccountTransactionPairImpl(
+      null == account
+          ? _value.account
+          : account // ignore: cast_nullable_to_non_nullable
+              as Account,
+      null == transaction
+          ? _value.transaction
+          : transaction // ignore: cast_nullable_to_non_nullable
+              as Transaction,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$AccountTransactionPairImpl
+    with DiagnosticableTreeMixin
+    implements _AccountTransactionPair {
+  _$AccountTransactionPairImpl(this.account, this.transaction);
+
+  @override
+  final Account account;
+  @override
+  final Transaction transaction;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'AccountTransactionPair(account: $account, transaction: $transaction)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'AccountTransactionPair'))
+      ..add(DiagnosticsProperty('account', account))
+      ..add(DiagnosticsProperty('transaction', transaction));
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$AccountTransactionPairImpl &&
+            (identical(other.account, account) || other.account == account) &&
+            (identical(other.transaction, transaction) ||
+                other.transaction == transaction));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, account, transaction);
+
+  /// Create a copy of AccountTransactionPair
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$AccountTransactionPairImplCopyWith<_$AccountTransactionPairImpl>
+      get copyWith => __$$AccountTransactionPairImplCopyWithImpl<
+          _$AccountTransactionPairImpl>(this, _$identity);
+}
+
+abstract class _AccountTransactionPair implements AccountTransactionPair {
+  factory _AccountTransactionPair(
+          final Account account, final Transaction transaction) =
+      _$AccountTransactionPairImpl;
+
+  @override
+  Account get account;
+  @override
+  Transaction get transaction;
+
+  /// Create a copy of AccountTransactionPair
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$AccountTransactionPairImplCopyWith<_$AccountTransactionPairImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+mixin _$DoubleEntryTransaction {
+  AccountTransactionPair get first => throw _privateConstructorUsedError;
+  AccountTransactionPair get second => throw _privateConstructorUsedError;
+
+  /// Create a copy of DoubleEntryTransaction
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $DoubleEntryTransactionCopyWith<DoubleEntryTransaction> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $DoubleEntryTransactionCopyWith<$Res> {
+  factory $DoubleEntryTransactionCopyWith(DoubleEntryTransaction value,
+          $Res Function(DoubleEntryTransaction) then) =
+      _$DoubleEntryTransactionCopyWithImpl<$Res, DoubleEntryTransaction>;
+  @useResult
+  $Res call({AccountTransactionPair first, AccountTransactionPair second});
+
+  $AccountTransactionPairCopyWith<$Res> get first;
+  $AccountTransactionPairCopyWith<$Res> get second;
+}
+
+/// @nodoc
+class _$DoubleEntryTransactionCopyWithImpl<$Res,
+        $Val extends DoubleEntryTransaction>
+    implements $DoubleEntryTransactionCopyWith<$Res> {
+  _$DoubleEntryTransactionCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of DoubleEntryTransaction
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? first = null,
+    Object? second = null,
+  }) {
+    return _then(_value.copyWith(
+      first: null == first
+          ? _value.first
+          : first // ignore: cast_nullable_to_non_nullable
+              as AccountTransactionPair,
+      second: null == second
+          ? _value.second
+          : second // ignore: cast_nullable_to_non_nullable
+              as AccountTransactionPair,
+    ) as $Val);
+  }
+
+  /// Create a copy of DoubleEntryTransaction
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $AccountTransactionPairCopyWith<$Res> get first {
+    return $AccountTransactionPairCopyWith<$Res>(_value.first, (value) {
+      return _then(_value.copyWith(first: value) as $Val);
+    });
+  }
+
+  /// Create a copy of DoubleEntryTransaction
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $AccountTransactionPairCopyWith<$Res> get second {
+    return $AccountTransactionPairCopyWith<$Res>(_value.second, (value) {
+      return _then(_value.copyWith(second: value) as $Val);
+    });
+  }
+}
+
+/// @nodoc
+abstract class _$$DoubleEntryTransactionImplCopyWith<$Res>
+    implements $DoubleEntryTransactionCopyWith<$Res> {
+  factory _$$DoubleEntryTransactionImplCopyWith(
+          _$DoubleEntryTransactionImpl value,
+          $Res Function(_$DoubleEntryTransactionImpl) then) =
+      __$$DoubleEntryTransactionImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({AccountTransactionPair first, AccountTransactionPair second});
+
+  @override
+  $AccountTransactionPairCopyWith<$Res> get first;
+  @override
+  $AccountTransactionPairCopyWith<$Res> get second;
+}
+
+/// @nodoc
+class __$$DoubleEntryTransactionImplCopyWithImpl<$Res>
+    extends _$DoubleEntryTransactionCopyWithImpl<$Res,
+        _$DoubleEntryTransactionImpl>
+    implements _$$DoubleEntryTransactionImplCopyWith<$Res> {
+  __$$DoubleEntryTransactionImplCopyWithImpl(
+      _$DoubleEntryTransactionImpl _value,
+      $Res Function(_$DoubleEntryTransactionImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of DoubleEntryTransaction
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? first = null,
+    Object? second = null,
+  }) {
+    return _then(_$DoubleEntryTransactionImpl(
+      null == first
+          ? _value.first
+          : first // ignore: cast_nullable_to_non_nullable
+              as AccountTransactionPair,
+      null == second
+          ? _value.second
+          : second // ignore: cast_nullable_to_non_nullable
+              as AccountTransactionPair,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$DoubleEntryTransactionImpl
+    with DiagnosticableTreeMixin
+    implements _DoubleEntryTransaction {
+  _$DoubleEntryTransactionImpl(this.first, this.second);
+
+  @override
+  final AccountTransactionPair first;
+  @override
+  final AccountTransactionPair second;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'DoubleEntryTransaction(first: $first, second: $second)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'DoubleEntryTransaction'))
+      ..add(DiagnosticsProperty('first', first))
+      ..add(DiagnosticsProperty('second', second));
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$DoubleEntryTransactionImpl &&
+            (identical(other.first, first) || other.first == first) &&
+            (identical(other.second, second) || other.second == second));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, first, second);
+
+  /// Create a copy of DoubleEntryTransaction
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$DoubleEntryTransactionImplCopyWith<_$DoubleEntryTransactionImpl>
+      get copyWith => __$$DoubleEntryTransactionImplCopyWithImpl<
+          _$DoubleEntryTransactionImpl>(this, _$identity);
+}
+
+abstract class _DoubleEntryTransaction implements DoubleEntryTransaction {
+  factory _DoubleEntryTransaction(final AccountTransactionPair first,
+      final AccountTransactionPair second) = _$DoubleEntryTransactionImpl;
+
+  @override
+  AccountTransactionPair get first;
+  @override
+  AccountTransactionPair get second;
+
+  /// Create a copy of DoubleEntryTransaction
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$DoubleEntryTransactionImplCopyWith<_$DoubleEntryTransactionImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
