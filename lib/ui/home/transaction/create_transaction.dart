@@ -101,6 +101,7 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
                 height: 8,
               ),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(left: 12.0, right: 16.0),
@@ -117,7 +118,7 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
                           _debitAccount = value;
                         });
                       },
-                      validator: (value) => value == null ? 'Please choose an account' : null,
+                      validator: (value) => value == null ? 'Required' : null,
                     ),
                   ),
                 ],
@@ -126,6 +127,7 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
                 height: 8,
               ),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(left: 12.0, right: 16.0),
@@ -170,7 +172,7 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
                         labelText: 'Description',
                       ),
                       onSaved: (value) => _description = value ?? '',
-                      validator: (value) => value == null || value.isEmpty ? 'Please enter a description' : null,
+                      validator: (value) => value == null || value.isEmpty ? 'Required' : null,
                     ),
                   ),
                 ],
@@ -189,6 +191,7 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
                 height: 32,
               ),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(left: 12.0, right: 16.0),
@@ -201,7 +204,7 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
                       labelText: 'Transfer Account',
                       initialValue: _transferAccount,
                       onChanged: (value) => _transferAccount = value,
-                      validator: (value) => value == null ? 'Please choose an account' : null,
+                      validator: (value) => value == null ? 'Required' : null,
                     ),
                   ),
                 ],
@@ -210,7 +213,7 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
                 height: 32,
               ),
               Row(
-                // three text fields, first two editable, last one read only, all number fields
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(left: 12.0, right: 16.0),
@@ -227,18 +230,19 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
                       ),
                       keyboardType: TextInputType.number,
                       onChanged: (value) {
+                        _creditAmountController.text = '';
                         setState(() {
                           _amount = double.tryParse(value);
                         });
                       },
                       controller: _debitAmountController,
                       validator: (value) {
-                        if (value == null) {
+                        if (value == null || value.isEmpty) {
                           return null;
                         }
                         double? amount = double.tryParse(value);
                         if (amount == null) {
-                          return 'Amount invalid';
+                          return 'Invalid';
                         }
                         return null;
                       },
@@ -257,15 +261,23 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
                       keyboardType: TextInputType.number,
                       onChanged: (value) {
                         _debitAmountController.text = '';
+                        setState(() {
+                          double? amount = double.tryParse(value);
+                          if (amount != null) {
+                            _amount = -amount;
+                          } else {
+                            _amount = null;
+                          }
+                        });
                       },
                       controller: _creditAmountController,
                       validator: (value) {
-                        if (value == null) {
+                        if (value == null || value.isEmpty) {
                           return null;
                         }
                         double? amount = double.tryParse(value);
                         if (amount == null) {
-                          return 'Amount invalid';
+                          return 'Invalid';
                         }
                         return null;
                       },
@@ -288,17 +300,25 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
                           return (_amount! * sign).toStringAsFixed(2);
                         }(),
                       ),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: () {
+                          if (_amount == null) {
+                            return null;
+                          }
+                          double sign = _debitAccount!.type.debitIsNegative ? -1 : 1;
+                          return (_amount! * sign) < 0 ? Colors.red : null;
+                        }(),
+                      ),
                       onTap: () {},
                       validator: (value) {
                         if (_amount == null) {
-                          return 'Please enter an amount';
+                          return 'Required';
                         }
                         return null;
                       },
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        labelText: 'Balance',
+                        labelText: 'Result',
                       ),
                     ),
                   ),
@@ -312,26 +332,48 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
   }
 }
 
-class AccountFormField extends ConsumerStatefulWidget {
-  final Account? initialValue;
+class AccountFormField extends FormField<Account?> {
   final void Function(Account?) onChanged;
-  final String? Function(Account?) validator;
   final String labelText;
 
-  const AccountFormField({required this.labelText, required this.initialValue, required this.onChanged, required this.validator, super.key});
-
-  @override
-  ConsumerState createState() => _AccountFormFieldState();
+  AccountFormField({
+    required this.labelText,
+    required this.onChanged,
+    required super.initialValue,
+    required super.validator,
+    super.key,
+  }) : super(
+    builder: (state) {
+      return AccountField(
+        onChanged: (account) {
+          state.didChange(account);
+          onChanged(account);
+        },
+        labelText: labelText,
+        errorText: state.errorText,
+      );
+    },
+  );
 }
 
-class _AccountFormFieldState extends ConsumerState<AccountFormField> {
-  late final GlobalKey<FormFieldState<Account?>> formFieldKey;
+class AccountField extends ConsumerStatefulWidget {
+  final void Function(Account?) onChanged;
+  final String labelText;
+  final String? errorText;
+
+  const AccountField({required this.onChanged, required this.labelText, required this.errorText, super.key});
+
+  @override
+  ConsumerState createState() => _AccountFieldState();
+}
+
+class _AccountFieldState extends ConsumerState<AccountField> {
   late final AutoScrollController scrollController;
+  Account? account;
 
   @override
   void initState() {
     super.initState();
-    formFieldKey = GlobalKey<FormFieldState<Account?>>();
     scrollController = AutoScrollController();
   }
 
@@ -341,96 +383,90 @@ class _AccountFormFieldState extends ConsumerState<AccountFormField> {
     scrollController.dispose();
   }
 
-  Account? get currentValue => formFieldKey.currentState?.value;
-
   @override
   Widget build(BuildContext context) {
-    return FormField<Account?>(
-      key: formFieldKey,
-      initialValue: widget.initialValue,
-      builder: (state) {
-        return TextField(
-          readOnly: true,
-          controller: TextEditingController(
-            text: formFieldKey.currentState?.value?.name ?? 'Choose Account',
+    return TextField(
+      readOnly: true,
+      controller: TextEditingController(
+        text: account?.name ?? 'Choose Account',
+      ),
+      decoration: InputDecoration(
+        border: const OutlineInputBorder(),
+        labelText: widget.labelText,
+        errorText: widget.errorText,
+      ),
+      onTap: () async {
+        showModalBottomSheet(
+          enableDrag: false,
+          context: context,
+          isScrollControlled: true,
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.8,
           ),
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            labelText: widget.labelText,
-          ),
-          onTap: () async {
-            showModalBottomSheet(
-              enableDrag: false,
-              context: context,
-              isScrollControlled: true,
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.8,
-              ),
-              builder: (context) {
-                TreeNode<Account> accountTree = TreeNode<Account>.root();
-                TreeNode<Account> buildAccountTree(AccountNode account) {
-                  TreeNode<Account> node = TreeNode<Account>(data: account.account)..addAll(account.children.map(buildAccountTree));
-                  return node;
-                }
+          builder: (context) {
+            TreeNode<Account> accountTree = TreeNode<Account>.root();
+            TreeNode<Account> buildAccountTree(AccountNode account) {
+              TreeNode<Account> node = TreeNode<Account>(data: account.account)..addAll(account.children.map(buildAccountTree));
+              return node;
+            }
 
-                List<AccountNode> accountNodes = ref.watch(accountTreeProvider);
-                accountTree.addAll(accountNodes.map(buildAccountTree));
+            List<AccountNode> accountNodes = ref.watch(accountTreeProvider);
+            accountTree.addAll(accountNodes.map(buildAccountTree));
 
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: CustomScrollView(
-                    shrinkWrap: true,
-                    controller: scrollController,
-                    slivers: [
-                      SliverTreeView.simple(
-                        scrollController: scrollController,
-                        showRootNode: false,
-                        tree: accountTree,
-                        expansionIndicatorBuilder: (context, node) {
-                          return NoExpansionIndicator(tree: node);
-                        },
-                        expansionBehavior: ExpansionBehavior.collapseOthersAndSnapToTop,
-                        builder: (context, node) {
-                          Account? account = node.data;
-                          if (account == null) {
-                            return const SizedBox.shrink();
-                          }
-                          bool isExpanded = node.isExpanded;
-                          bool hasChildren = !node.isLeaf;
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: CustomScrollView(
+                shrinkWrap: true,
+                controller: scrollController,
+                slivers: [
+                  SliverTreeView.simple(
+                    scrollController: scrollController,
+                    showRootNode: false,
+                    tree: accountTree,
+                    expansionIndicatorBuilder: (context, node) {
+                      return NoExpansionIndicator(tree: node);
+                    },
+                    expansionBehavior: ExpansionBehavior.collapseOthersAndSnapToTop,
+                    builder: (context, node) {
+                      Account? account = node.data;
+                      if (account == null) {
+                        return const SizedBox.shrink();
+                      }
+                      bool isExpanded = node.isExpanded;
+                      bool hasChildren = !node.isLeaf;
 
-                          return Card(
-                            surfaceTintColor: account.placeholder ? Theme.of(context).disabledColor : null,
-                            child: ListTile(
-                              leading: hasChildren
-                                  ? AnimatedRotation(
-                                      turns: isExpanded ? 0.25 : 0,
-                                      duration: const Duration(milliseconds: 300),
-                                      curve: Curves.easeInOut,
-                                      child: const Icon(Icons.arrow_right),
-                                    )
-                                  : null,
-                              title: Text(account.name),
-                              trailing: account.placeholder ? null : const Icon(Icons.arrow_forward),
-                              onTap: account.placeholder
-                                  ? null
-                                  : () {
-                                      formFieldKey.currentState?.didChange(account);
-                                      widget.onChanged(account);
-                                      Navigator.of(context).pop();
-                                    },
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                      return Card(
+                        surfaceTintColor: account.placeholder ? Theme.of(context).disabledColor : null,
+                        child: ListTile(
+                          leading: hasChildren
+                              ? AnimatedRotation(
+                                  turns: isExpanded ? 0.25 : 0,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                  child: const Icon(Icons.arrow_right),
+                                )
+                              : null,
+                          title: Text(account.name),
+                          trailing: account.placeholder ? null : const Icon(Icons.arrow_forward),
+                          onTap: account.placeholder
+                              ? null
+                              : () {
+                                  setState(() {
+                                    this.account = account;
+                                  });
+                                  widget.onChanged(account);
+                                  Navigator.of(context).pop();
+                                },
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
+                ],
+              ),
             );
           },
         );
       },
-      validator: widget.validator,
     );
   }
 }

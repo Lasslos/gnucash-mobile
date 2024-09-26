@@ -1,12 +1,14 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gnucash_mobile/core/models/account.dart';
 import 'package:gnucash_mobile/ui/export/export.dart';
 import 'package:gnucash_mobile/ui/home/accounts.dart';
 import 'package:gnucash_mobile/ui/home/transaction/create_transaction.dart';
 import 'package:gnucash_mobile/ui/home/transactions.dart';
 import 'package:gnucash_mobile/ui/settings/settings.dart';
 import 'package:gnucash_mobile/ui/transaction_form.dart';
+import 'package:logger/logger.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -100,7 +102,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               heroTag: "create_transaction",
               onPressed: () async {
                 //TODO: Add returned values to provider
-                await showCreateTransactionDialog(context);
+                DoubleEntryTransaction? transaction = await showCreateTransactionDialog(context);
+                Logger().i("Created Transaction: $transaction");
               },
             )
           : null,
