@@ -27,6 +27,8 @@ class _CreateTransactionView extends ConsumerStatefulWidget {
 
 class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late final TextEditingController _debitAmountController;
+  late final TextEditingController _creditAmountController;
 
   Account? _debitAccount;
   DateTime _transactionDate = DateTime.now();
@@ -40,6 +42,8 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
     super.initState();
     _debitAccount = ref.read(favoriteDebitAccountProvider);
     _transferAccount = ref.read(favoriteCreditAccountProvider);
+    _debitAmountController = TextEditingController();
+    _creditAmountController = TextEditingController();
   }
 
   @override
@@ -92,29 +96,213 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
           key: _formKey,
           child: ListView(
             children: [
+              const Divider(),
               const SizedBox(
-                height: 16,
+                height: 8,
               ),
               Row(
                 children: [
-                  const Icon(
-                    Icons.arrow_forward,
+                  const Padding(
+                    padding: EdgeInsets.only(left: 12.0, right: 16.0),
+                    child: Icon(
+                      Icons.arrow_forward,
+                    ),
                   ),
                   Expanded(
                     child: AccountFormField(
+                      labelText: 'Account',
                       initialValue: _debitAccount,
-                      onSaved: (value) => _debitAccount = value,
+                      onChanged: (value) {
+                        setState(() {
+                          _debitAccount = value;
+                        });
+                      },
                       validator: (value) => value == null ? 'Please choose an account' : null,
                     ),
                   ),
                 ],
               ),
-              TextFormField(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Description',
+              const SizedBox(
+                height: 8,
+              ),
+              Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(left: 12.0, right: 16.0),
+                    child: Icon(
+                      Icons.today,
+                    ),
+                  ),
+                  Flexible(
+                    flex: 2,
+                    child: TextFormField(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Date',
+                      ),
+                      readOnly: true,
+                      controller: TextEditingController(
+                        text: _transactionDate.toIso8601String().split('T').first,
+                      ),
+                      onTap: () async {
+                        DateTime? date = await showDatePicker(
+                          context: context,
+                          initialDate: _transactionDate,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (date != null) {
+                          setState(() {
+                            _transactionDate = date;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  Flexible(
+                    flex: 3,
+                    child: TextFormField(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Description',
+                      ),
+                      onSaved: (value) => _description = value ?? '',
+                      validator: (value) => value == null || value.isEmpty ? 'Please enter a description' : null,
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 52.0, top: 8.0),
+                child: TextFormField(
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Notes (optional)',
+                  ),
+                  onSaved: (value) => notes = value ?? '',
                 ),
-                onSaved: (value) => _description = value ?? '',
+              ),
+              const Divider(
+                height: 32,
+              ),
+              Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(left: 12.0, right: 16.0),
+                    child: Icon(
+                      Icons.arrow_back,
+                    ),
+                  ),
+                  Expanded(
+                    child: AccountFormField(
+                      labelText: 'Transfer Account',
+                      initialValue: _transferAccount,
+                      onChanged: (value) => _transferAccount = value,
+                      validator: (value) => value == null ? 'Please choose an account' : null,
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(
+                height: 32,
+              ),
+              Row(
+                // three text fields, first two editable, last one read only, all number fields
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(left: 12.0, right: 16.0),
+                    child: Icon(
+                      Icons.attach_money,
+                    ),
+                  ),
+                  Flexible(
+                    child: TextFormField(
+                      enabled: _debitAccount != null,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        labelText: _debitAccount?.type.debitName ?? 'Debit',
+                      ),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) {
+                        setState(() {
+                          _amount = double.tryParse(value);
+                        });
+                      },
+                      controller: _debitAmountController,
+                      validator: (value) {
+                        if (value == null) {
+                          return null;
+                        }
+                        double? amount = double.tryParse(value);
+                        if (amount == null) {
+                          return 'Amount invalid';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  Flexible(
+                    child: TextFormField(
+                      enabled: _debitAccount != null,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        labelText: _debitAccount?.type.creditName ?? 'Credit',
+                      ),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) {
+                        _debitAmountController.text = '';
+                      },
+                      controller: _creditAmountController,
+                      validator: (value) {
+                        if (value == null) {
+                          return null;
+                        }
+                        double? amount = double.tryParse(value);
+                        if (amount == null) {
+                          return 'Amount invalid';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  Flexible(
+                    child: TextFormField(
+                      enabled: _debitAccount != null,
+                      readOnly: true,
+                      controller: TextEditingController(
+                        text: () {
+                          // if account is null or no amount is given or conflicting amounts are given, return empty string
+                          if (_debitAccount == null || _amount == null) {
+                            return '';
+                          }
+                          double sign = _debitAccount!.type.debitIsNegative ? -1 : 1;
+                          return (_amount! * sign).toStringAsFixed(2);
+                        }(),
+                      ),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      onTap: () {},
+                      validator: (value) {
+                        if (_amount == null) {
+                          return 'Please enter an amount';
+                        }
+                        return null;
+                      },
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Balance',
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -126,10 +314,11 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
 
 class AccountFormField extends ConsumerStatefulWidget {
   final Account? initialValue;
-  final void Function(Account?) onSaved;
+  final void Function(Account?) onChanged;
   final String? Function(Account?) validator;
+  final String labelText;
 
-  const AccountFormField({required this.initialValue, required this.onSaved, required this.validator, super.key});
+  const AccountFormField({required this.labelText, required this.initialValue, required this.onChanged, required this.validator, super.key});
 
   @override
   ConsumerState createState() => _AccountFormFieldState();
@@ -152,6 +341,8 @@ class _AccountFormFieldState extends ConsumerState<AccountFormField> {
     scrollController.dispose();
   }
 
+  Account? get currentValue => formFieldKey.currentState?.value;
+
   @override
   Widget build(BuildContext context) {
     return FormField<Account?>(
@@ -161,21 +352,19 @@ class _AccountFormFieldState extends ConsumerState<AccountFormField> {
         return TextField(
           readOnly: true,
           controller: TextEditingController(
-            text: formFieldKey.currentState?.value?.name ?? 'Choose an account',
+            text: formFieldKey.currentState?.value?.name ?? 'Choose Account',
           ),
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Account',
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            labelText: widget.labelText,
           ),
           onTap: () async {
-            showBottomSheet(
+            showModalBottomSheet(
               enableDrag: false,
               context: context,
-              sheetAnimationStyle: AnimationStyle(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                reverseDuration: const Duration(milliseconds: 300),
-                reverseCurve: Curves.easeInOut,
+              isScrollControlled: true,
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.8,
               ),
               builder: (context) {
                 TreeNode<Account> accountTree = TreeNode<Account>.root();
@@ -226,6 +415,7 @@ class _AccountFormFieldState extends ConsumerState<AccountFormField> {
                                   ? null
                                   : () {
                                       formFieldKey.currentState?.didChange(account);
+                                      widget.onChanged(account);
                                       Navigator.of(context).pop();
                                     },
                             ),
@@ -241,7 +431,6 @@ class _AccountFormFieldState extends ConsumerState<AccountFormField> {
         );
       },
       validator: widget.validator,
-      onSaved: widget.onSaved,
     );
   }
 }
