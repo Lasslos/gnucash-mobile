@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gnucash_mobile/ui/export/export.dart';
 import 'package:gnucash_mobile/ui/home/accounts.dart';
+import 'package:gnucash_mobile/ui/home/transaction/create_transaction.dart';
 import 'package:gnucash_mobile/ui/home/transactions.dart';
 import 'package:gnucash_mobile/ui/settings/settings.dart';
 import 'package:gnucash_mobile/ui/transaction_form.dart';
@@ -98,12 +99,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               icon: const Icon(Icons.add),
               heroTag: "create_transaction",
               onPressed: () async {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const TransactionForm(),
-                  ),
-                );
+                //TODO: Add returned values to provider
+                await showCreateTransactionDialog(context);
               },
             )
           : null,
