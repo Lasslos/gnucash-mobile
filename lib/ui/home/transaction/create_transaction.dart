@@ -48,8 +48,6 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
 
   @override
   Widget build(BuildContext context) {
-    List<Account> transactionAccounts = ref.watch(transactionAccountListProvider);
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -436,6 +434,7 @@ class _AccountFieldState extends ConsumerState<AccountField> {
                       bool hasChildren = !node.isLeaf;
 
                       return Card(
+                        clipBehavior: Clip.antiAlias,
                         surfaceTintColor: account.placeholder ? Theme.of(context).disabledColor : null,
                         child: ListTile(
                           leading: hasChildren

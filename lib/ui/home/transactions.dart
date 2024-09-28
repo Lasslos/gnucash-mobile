@@ -221,10 +221,15 @@ class DoubleEntryTransactionWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     Transaction transaction = doubleEntryTransaction.first.transaction;
     Transaction otherTransaction = doubleEntryTransaction.second.transaction;
+    Account account = doubleEntryTransaction.first.account;
+    Account otherAccount = doubleEntryTransaction.second.account;
 
     String subtitle = DateFormat.MMMd().format(transaction.date);
     String topLine = doubleEntryTransaction.first.account.name;
     String bottomLine = doubleEntryTransaction.second.account.name;
+
+    double amount = transaction.amount * (account.type.debitIsNegative ? -1 : 1);
+    double otherAmount = otherTransaction.amount * (otherAccount.type.debitIsNegative ? -1 : 1);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -265,17 +270,17 @@ class DoubleEntryTransactionWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                (transaction.amount.isNegative ? "" : "+") +transaction.amount.toStringAsFixed(2),
+                (amount.isNegative ? "" : "+") + amount.toStringAsFixed(2),
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: transaction.amount.isNegative ? Colors.red : Colors.green,
+                  color: amount.isNegative ? Colors.red : Colors.green,
                 ),
               ),
               Text(
-              (otherTransaction.amount.isNegative ? "" : "+") + otherTransaction.amount.toStringAsFixed(2),
+              (otherAmount.isNegative ? "" : "+") + otherAmount.toStringAsFixed(2),
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: otherTransaction.amount.isNegative ? Colors.red : Colors.green,
+                  color: otherAmount.isNegative ? Colors.red : Colors.green,
                 ),
               ),
             ],

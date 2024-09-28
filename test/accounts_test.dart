@@ -327,8 +327,6 @@ void main() async {
     final dynamic = jsonDecode(accountString);
     final Account account = Account.fromJson(dynamic);
     // final account = Account.fromJson({"account": accountString});
-    final accountJson = jsonEncode(account);
-
     print("Account");
     //print(account.children[0]);
     // print("Account JSON");
