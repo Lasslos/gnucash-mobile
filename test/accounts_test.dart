@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gnucash_mobile/core/models/account.dart';
 
@@ -327,11 +328,11 @@ void main() async {
     final dynamic = jsonDecode(accountString);
     final Account account = Account.fromJson(dynamic);
     // final account = Account.fromJson({"account": accountString});
-    print("Account");
+    debugPrint("Account");
     //print(account.children[0]);
     // print("Account JSON");
     // print(accountJson);
-    assert(account.fullName == "Assets");
+    assert(account.fullName == "Assets", "Account fullName should be 'Assets'");
     //assert(account.children.length == 2);
     // assert(accountString == accountJson);
   });

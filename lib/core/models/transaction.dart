@@ -1,5 +1,5 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:gnucash_mobile/core/models/account.dart';
 import 'package:intl/intl.dart';
 
@@ -16,16 +16,13 @@ class Transaction with _$Transaction implements Comparable<Transaction> {
     ///
     /// This identifier is used for both entries in the double-entry system.
     required String id,
-
     required String description,
-
     required String notes,
 
     /// The type of commodity and currency used in the transaction.
     ///
     /// Example: `CURRENCY::EUR`, `CURRENCY::USD`, `CURRENCY::GBP`
     required String commodityCurrency,
-
     required double amount,
   }) = _Transaction;
 
@@ -42,8 +39,7 @@ class Transaction with _$Transaction implements Comparable<Transaction> {
     );
   }
 
-  factory Transaction.fromJson(Map<String, dynamic> json) =>
-      _$TransactionFromJson(json);
+  factory Transaction.fromJson(Map<String, dynamic> json) => _$TransactionFromJson(json);
 
   @override
   int compareTo(Transaction other) {
@@ -80,4 +76,20 @@ List<String> transactionToCSV(Account account, Transaction transaction) {
     "", // Reconcile Date
     "", // Rate/Price
   ];
+}
+
+@freezed
+class AccountTransactionPair with _$AccountTransactionPair {
+  factory AccountTransactionPair(
+    Account account,
+    Transaction transaction,
+  ) = _AccountTransactionPair;
+}
+
+@freezed
+class DoubleEntryTransaction with _$DoubleEntryTransaction {
+  factory DoubleEntryTransaction(
+    AccountTransactionPair first,
+    AccountTransactionPair second,
+  ) = _DoubleEntryTransaction;
 }

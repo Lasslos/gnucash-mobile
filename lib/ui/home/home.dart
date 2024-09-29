@@ -1,7 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gnucash_mobile/core/models/account.dart';
+import 'package:gnucash_mobile/core/models/transaction.dart';
 import 'package:gnucash_mobile/core/providers/transactions.dart';
 import 'package:gnucash_mobile/ui/export/export.dart';
 import 'package:gnucash_mobile/ui/home/accounts.dart';
@@ -106,8 +106,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   return;
                 }
                 Logger().i("Created transaction: $transaction");
-                ref.read(transactionsProvider(transaction.first.account).notifier).add(transaction.first.transaction);
-                ref.read(transactionsProvider(transaction.second.account).notifier).add(transaction.second.transaction);
+                ref.read(doubleEntryTransactionListProvider.notifier).add(transaction);
               },
             )
           : null,

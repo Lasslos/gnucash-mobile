@@ -3,7 +3,6 @@ import 'package:csv/csv_settings_autodetection.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gnucash_mobile/core/models/account_type.dart';
-import 'package:gnucash_mobile/core/models/transaction.dart';
 import 'package:logger/logger.dart';
 
 part 'account.freezed.dart';
@@ -155,20 +154,4 @@ class AccountParsingException implements Exception {
   String toString() {
     return 'AccountParsingException: $message';
   }
-}
-
-@freezed
-class AccountTransactionPair with _$AccountTransactionPair {
-  factory AccountTransactionPair(
-    Account account,
-    Transaction transaction,
-  ) = _AccountTransactionPair;
-}
-
-@freezed
-class DoubleEntryTransaction with _$DoubleEntryTransaction {
-  factory DoubleEntryTransaction(
-    AccountTransactionPair first,
-    AccountTransactionPair second,
-  ) = _DoubleEntryTransaction;
 }

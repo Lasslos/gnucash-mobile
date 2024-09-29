@@ -27,6 +27,7 @@ class TransactionsView extends ConsumerWidget {
 }
 
 class _GlobalTransactionsView extends ConsumerWidget {
+  // ignore: unused_element
   const _GlobalTransactionsView({super.key});
 
   @override
@@ -73,6 +74,7 @@ class _GlobalTransactionsView extends ConsumerWidget {
 }
 
 class _SingleAccountTransactionsView extends ConsumerWidget {
+  // ignore: unused_element
   const _SingleAccountTransactionsView({required this.account, super.key});
 
   final Account account;
@@ -138,9 +140,13 @@ class _SingleAccountTransactionsView extends ConsumerWidget {
                 style: TextStyle(inherit: true, color: Colors.red),
               ),
               onPressed: () {
-                for (Transaction transaction in transactions) {
-                  //TODO: Remove transaction in second account!
-                  ref.read(transactionsProvider(account).notifier).remove(transaction);
+                List<DoubleEntryTransaction> doubleEntryTransactions = ref.read(doubleEntryTransactionListProvider);
+                Set<String> transactionIds = transactions.map((e) => e.id).toSet();
+                // Only keep those where the transaction id is in the set of transaction ids to delete
+                doubleEntryTransactions.removeWhere((element) => !transactionIds.contains(element.first.transaction.id));
+                // Remove the transactions
+                for (DoubleEntryTransaction transaction in doubleEntryTransactions) {
+                  ref.read(doubleEntryTransactionListProvider.notifier).remove(transaction);
                 }
                 Navigator.of(context).pop();
               },

@@ -19,6 +19,7 @@ Future<DoubleEntryTransaction?> showCreateTransactionDialog(BuildContext context
 }
 
 class _CreateTransactionView extends ConsumerStatefulWidget {
+  // ignore: unused_element
   const _CreateTransactionView({super.key});
 
   @override
