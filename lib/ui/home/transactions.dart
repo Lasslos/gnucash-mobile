@@ -67,6 +67,12 @@ class _GlobalTransactionsView extends ConsumerWidget {
           TransactionSlidable(
             key: ValueKey(doubleEntryTransaction.first.transaction),
             child: DoubleEntryTransactionWidget(doubleEntryTransaction: doubleEntryTransaction),
+            onEdit: (context) {
+              // TODO: Implement edit
+            },
+            onDelete: (context) {
+              ref.read(doubleEntryTransactionListProvider.notifier).remove(doubleEntryTransaction);
+            },
           ),
       ],
     );
@@ -102,6 +108,15 @@ class _SingleAccountTransactionsView extends ConsumerWidget {
             TransactionSlidable(
               key: ValueKey(transaction),
               child: TransactionWidget(account: account, transaction: transaction),
+              onEdit: (context) {
+                // TODO: Implement edit
+              },
+              onDelete: (context) {
+                DoubleEntryTransaction doubleEntryTransaction = ref.read(doubleEntryTransactionListProvider).firstWhere(
+                  (element) => element.first.transaction.id == transaction.id,
+                );
+                ref.read(doubleEntryTransactionListProvider.notifier).remove(doubleEntryTransaction);
+              },
             ),
         ],
       ),
@@ -158,13 +173,15 @@ class _SingleAccountTransactionsView extends ConsumerWidget {
   }
 }
 
-class TransactionSlidable extends StatelessWidget {
-  const TransactionSlidable({required this.child, super.key});
+class TransactionSlidable extends ConsumerWidget {
+  const TransactionSlidable({required this.child, required this.onEdit, required this.onDelete, super.key});
 
+  final void Function(BuildContext) onEdit;
+  final void Function(BuildContext) onDelete;
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Slidable(
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
@@ -172,16 +189,12 @@ class TransactionSlidable extends StatelessWidget {
           SlidableAction(
             icon: Icons.edit,
             backgroundColor: Colors.green,
-            onPressed: (BuildContext context) {
-              //TODO: Edit
-            },
+            onPressed: onEdit,
           ),
           SlidableAction(
             icon: Icons.delete,
             backgroundColor: Colors.red,
-            onPressed: (BuildContext context) {
-              //TODO: Remove
-            },
+            onPressed: onDelete,
           ),
         ],
       ),
@@ -278,16 +291,16 @@ class DoubleEntryTransactionWidget extends StatelessWidget {
               Text(
                 (amount.isNegative ? "" : "+") + amount.toStringAsFixed(2),
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: amount.isNegative ? Colors.red : Colors.green,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: amount.isNegative ? Colors.red : Colors.green,
+                    ),
               ),
               Text(
-              (otherAmount.isNegative ? "" : "+") + otherAmount.toStringAsFixed(2),
+                (otherAmount.isNegative ? "" : "+") + otherAmount.toStringAsFixed(2),
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: otherAmount.isNegative ? Colors.red : Colors.green,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: otherAmount.isNegative ? Colors.red : Colors.green,
+                    ),
               ),
             ],
           ),
