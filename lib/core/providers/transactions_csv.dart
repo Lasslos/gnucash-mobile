@@ -32,15 +32,15 @@ const csvHeader = [
 String transactionsCSV(TransactionsCSVRef ref) {
   List<List<String>> csv = []..add(csvHeader);
 
-  List<MapEntry<Account, Transaction>> transactions = [];
+  List<MapEntry<Account, SingleTransaction>> transactions = [];
   List<Account> accounts = ref.watch(accountListProvider);
   // Iterate over all accounts and collect the transactions
   for (Account account in accounts) {
-    List<Transaction> currentTransactions = ref.watch(transactionsProvider(account));
+    Iterable<SingleTransaction> currentTransactions = ref.watch(singleTransactionsProvider(account)).values;
     transactions.addAll(currentTransactions.map((transaction) => MapEntry(account, transaction)));
   }
 
-  for (MapEntry<Account, Transaction> pair in transactions) {
+  for (MapEntry<Account, SingleTransaction> pair in transactions) {
     csv.add(transactionToCSV(pair.key, pair.value));
   }
 

@@ -6,7 +6,6 @@ import 'package:gnucash_mobile/core/models/transaction.dart';
 import 'package:gnucash_mobile/core/providers/accounts.dart';
 import 'package:gnucash_mobile/core/providers/transactions.dart';
 import 'package:intl/intl.dart';
-import 'package:logger/logger.dart';
 
 class TransactionsView extends ConsumerWidget {
   /// The account node to display transactions for.
@@ -32,46 +31,29 @@ class _GlobalTransactionsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Map<Account, List<Transaction>> transactions = {};
-    for (Account account in ref.watch(transactionAccountListProvider)) {
-      transactions[account] = ref.watch(transactionsProvider(account));
-    }
-
-    List<DoubleEntryTransaction> doubleEntryTransactions = [];
-    Map<String, List<AccountTransactionPair>> transactionsById = {};
-    for (Account account in transactions.keys) {
-      for (Transaction transaction in transactions[account]!) {
-        transactionsById.putIfAbsent(transaction.id, () => []);
-        transactionsById[transaction.id]!.add(
-          AccountTransactionPair(
-            transactions.keys.firstWhere((element) => transactions[element]!.contains(transaction)),
-            transaction,
-          ),
-        );
-      }
-    }
-    for (List<AccountTransactionPair> pairs in transactionsById.values) {
-      if (pairs.length != 2) {
-        Logger().w("Transaction with id ${pairs.first.transaction.id} has ${pairs.length} entries, expected 2");
-      } else {
-        doubleEntryTransactions.add(DoubleEntryTransaction(pairs[0], pairs[1]));
-      }
-    }
-    doubleEntryTransactions.sort(
-      (a, b) => a.first.transaction.compareTo(b.first.transaction),
+    List<String> transactionIds = [
+      for (Account account in ref.watch(transactionAccountListProvider))
+        ...ref.watch(singleTransactionsProvider(account)).keys,
+    ];
+    Map<String, Transaction> transactionsMap = {
+      for (String transactionId in transactionIds)
+        transactionId: ref.watch(transactionsProvider(transactionId))!,
+    };
+    List<Transaction> transactions = transactionsMap.values.toList()..sort(
+      (a, b) => a.singleTransaction.compareTo(b.singleTransaction),
     );
 
     return ListView(
       children: [
-        for (DoubleEntryTransaction doubleEntryTransaction in doubleEntryTransactions)
+        for (Transaction transaction in transactions)
           TransactionSlidable(
-            key: ValueKey(doubleEntryTransaction.first.transaction),
-            child: DoubleEntryTransactionWidget(doubleEntryTransaction: doubleEntryTransaction),
+            key: ValueKey(transaction.singleTransaction),
+            child: TransactionWidget(transaction: transaction),
             onEdit: (context) {
               // TODO: Implement edit
             },
             onDelete: (context) {
-              ref.read(doubleEntryTransactionListProvider.notifier).remove(doubleEntryTransaction);
+              ref.read(transactionsProvider(transaction.singleTransaction.id).notifier).delete();
             },
           ),
       ],
@@ -87,7 +69,9 @@ class _SingleAccountTransactionsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    List<Transaction> transactions = ref.watch(transactionsProvider(account));
+    List<SingleTransaction> transactions = ref.watch(singleTransactionsProvider(account)).values.toList()..sort(
+      (a, b) => a.compareTo(b),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -104,18 +88,15 @@ class _SingleAccountTransactionsView extends ConsumerWidget {
       ),
       body: ListView(
         children: [
-          for (Transaction transaction in transactions)
+          for (SingleTransaction singleTransaction in transactions)
             TransactionSlidable(
-              key: ValueKey(transaction),
-              child: TransactionWidget(account: account, transaction: transaction),
+              key: ValueKey(singleTransaction),
+              child: SingleTransactionWidget(account: account, transaction: singleTransaction),
               onEdit: (context) {
                 // TODO: Implement edit
               },
               onDelete: (context) {
-                DoubleEntryTransaction doubleEntryTransaction = ref.read(doubleEntryTransactionListProvider).firstWhere(
-                  (element) => element.first.transaction.id == transaction.id,
-                );
-                ref.read(doubleEntryTransactionListProvider.notifier).remove(doubleEntryTransaction);
+                ref.read(transactionsProvider(singleTransaction.id).notifier).delete();
               },
             ),
         ],
@@ -126,7 +107,7 @@ class _SingleAccountTransactionsView extends ConsumerWidget {
   Future<void> _deleteTransactions(
     BuildContext context,
     WidgetRef ref,
-    List<Transaction> transactions,
+    List<SingleTransaction> transactions,
   ) {
     return showDialog<void>(
       context: context,
@@ -155,13 +136,8 @@ class _SingleAccountTransactionsView extends ConsumerWidget {
                 style: TextStyle(inherit: true, color: Colors.red),
               ),
               onPressed: () {
-                List<DoubleEntryTransaction> doubleEntryTransactions = ref.read(doubleEntryTransactionListProvider);
-                Set<String> transactionIds = transactions.map((e) => e.id).toSet();
-                // Only keep those where the transaction id is in the set of transaction ids to delete
-                doubleEntryTransactions.removeWhere((element) => !transactionIds.contains(element.first.transaction.id));
-                // Remove the transactions
-                for (DoubleEntryTransaction transaction in doubleEntryTransactions) {
-                  ref.read(doubleEntryTransactionListProvider.notifier).remove(transaction);
+                for (SingleTransaction singleTransaction in transactions) {
+                  ref.read(transactionsProvider(singleTransaction.id).notifier).delete();
                 }
                 Navigator.of(context).pop();
               },
@@ -203,15 +179,15 @@ class TransactionSlidable extends ConsumerWidget {
   }
 }
 
-class TransactionWidget extends StatelessWidget {
-  const TransactionWidget({
+class SingleTransactionWidget extends StatelessWidget {
+  const SingleTransactionWidget({
     required this.account,
     required this.transaction,
     super.key,
   });
 
   final Account account;
-  final Transaction transaction;
+  final SingleTransaction transaction;
 
   @override
   Widget build(BuildContext context) {
@@ -231,21 +207,21 @@ class TransactionWidget extends StatelessWidget {
   }
 }
 
-class DoubleEntryTransactionWidget extends StatelessWidget {
-  const DoubleEntryTransactionWidget({required this.doubleEntryTransaction, super.key});
+class TransactionWidget extends StatelessWidget {
+  const TransactionWidget({required this.transaction, super.key});
 
-  final DoubleEntryTransaction doubleEntryTransaction;
+  final Transaction transaction;
 
   @override
   Widget build(BuildContext context) {
-    Transaction transaction = doubleEntryTransaction.first.transaction;
-    Transaction otherTransaction = doubleEntryTransaction.second.transaction;
-    Account account = doubleEntryTransaction.first.account;
-    Account otherAccount = doubleEntryTransaction.second.account;
+    SingleTransaction transaction = this.transaction.singleTransaction;
+    SingleTransaction otherTransaction = this.transaction.otherSingleTransaction;
+    Account account = this.transaction.account;
+    Account otherAccount = this.transaction.otherAccount;
 
     String subtitle = DateFormat.MMMd().format(transaction.date);
-    String topLine = doubleEntryTransaction.first.account.name;
-    String bottomLine = doubleEntryTransaction.second.account.name;
+    String topLine = account.name;
+    String bottomLine = otherAccount.name;
 
     double amount = transaction.amount * (account.type.debitIsNegative ? -1 : 1);
     double otherAmount = otherTransaction.amount * (otherAccount.type.debitIsNegative ? -1 : 1);
@@ -260,7 +236,7 @@ class DoubleEntryTransactionWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  doubleEntryTransaction.first.transaction.description,
+                  transaction.description,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 Text(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gnucash_mobile/core/models/transaction.dart';
 import 'package:gnucash_mobile/core/providers/transactions.dart';
+
 import 'package:gnucash_mobile/ui/export/export.dart';
 import 'package:gnucash_mobile/ui/home/accounts.dart';
 import 'package:gnucash_mobile/ui/home/transaction/create_transaction.dart';
@@ -101,12 +102,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               icon: const Icon(Icons.add),
               heroTag: "create_transaction",
               onPressed: () async {
-                DoubleEntryTransaction? transaction = await showCreateTransactionDialog(context);
+                Transaction? transaction = await showCreateTransactionDialog(context);
                 if (transaction == null) {
                   return;
                 }
                 Logger().i("Created transaction: $transaction");
-                ref.read(doubleEntryTransactionListProvider.notifier).add(transaction);
+                ref.read(transactionsProvider(transaction.singleTransaction.id).notifier).set(transaction);
               },
             )
           : null,

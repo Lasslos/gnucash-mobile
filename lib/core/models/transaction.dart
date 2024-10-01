@@ -7,8 +7,8 @@ part 'transaction.freezed.dart';
 part 'transaction.g.dart';
 
 @freezed
-class Transaction with _$Transaction implements Comparable<Transaction> {
-  const factory Transaction({
+class SingleTransaction with _$SingleTransaction implements Comparable<SingleTransaction> {
+  const factory SingleTransaction({
     /// The date of the transaction.
     required DateTime date,
 
@@ -24,12 +24,12 @@ class Transaction with _$Transaction implements Comparable<Transaction> {
     /// Example: `CURRENCY::EUR`, `CURRENCY::USD`, `CURRENCY::GBP`
     required String commodityCurrency,
     required double amount,
-  }) = _Transaction;
+  }) = _SingleTransaction;
 
-  const Transaction._();
+  const SingleTransaction._();
 
-  static Transaction empty() {
-    return Transaction(
+  static SingleTransaction empty() {
+    return SingleTransaction(
       date: DateTime.now(),
       id: "",
       description: "",
@@ -39,10 +39,10 @@ class Transaction with _$Transaction implements Comparable<Transaction> {
     );
   }
 
-  factory Transaction.fromJson(Map<String, dynamic> json) => _$TransactionFromJson(json);
+  factory SingleTransaction.fromJson(Map<String, dynamic> json) => _$SingleTransactionFromJson(json);
 
   @override
-  int compareTo(Transaction other) {
+  int compareTo(SingleTransaction other) {
     int dateCompare = date.compareTo(other.date);
     if (dateCompare != 0) {
       return dateCompare;
@@ -55,7 +55,7 @@ class Transaction with _$Transaction implements Comparable<Transaction> {
 ///
 /// The rows are formatted as follows:
 /// Date,Transaction ID,Number,Description,Notes,Commodity/Currency,Void Reason,Action,Memo,Full Account Name,Account Name,Amount With Sym,Amount Num.,Value With Sym,Value Num.,Reconcile,Reconcile Date,Rate/Price
-List<String> transactionToCSV(Account account, Transaction transaction) {
+List<String> transactionToCSV(Account account, SingleTransaction transaction) {
   return [
     DateFormat('yyyy-MM-dd').format(transaction.date), // Date
     transaction.id, // Transaction ID
@@ -79,17 +79,11 @@ List<String> transactionToCSV(Account account, Transaction transaction) {
 }
 
 @freezed
-class AccountTransactionPair with _$AccountTransactionPair {
-  factory AccountTransactionPair(
-    Account account,
-    Transaction transaction,
-  ) = _AccountTransactionPair;
-}
-
-@freezed
-class DoubleEntryTransaction with _$DoubleEntryTransaction {
-  factory DoubleEntryTransaction(
-    AccountTransactionPair first,
-    AccountTransactionPair second,
-  ) = _DoubleEntryTransaction;
+class Transaction with _$Transaction {
+  factory Transaction({
+    required SingleTransaction singleTransaction,
+    required Account account,
+    required SingleTransaction otherSingleTransaction,
+    required Account otherAccount,
+  }) = _Transaction;
 }

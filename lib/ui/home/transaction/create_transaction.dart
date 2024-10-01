@@ -7,7 +7,7 @@ import 'package:gnucash_mobile/core/models/transaction.dart';
 import 'package:gnucash_mobile/core/providers/accounts.dart';
 import 'package:uuid/uuid.dart';
 
-Future<DoubleEntryTransaction?> showCreateTransactionDialog(BuildContext context) {
+Future<Transaction?> showCreateTransactionDialog(BuildContext context) {
   return showDialog(
     context: context,
     builder: (context) {
@@ -65,7 +65,7 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
                   Account first = _debitAccount!;
                   Account second = _transferAccount!;
                   String id = const Uuid().v4();
-                  Transaction firstTransaction = Transaction(
+                  SingleTransaction firstTransaction = SingleTransaction(
                     date: _transactionDate,
                     id: id,
                     description: _description,
@@ -73,13 +73,15 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
                     commodityCurrency: first.namespace + '::' + first.symbol,
                     amount: _amount!,
                   );
-                  Transaction secondTransaction = firstTransaction.copyWith(
+                  SingleTransaction secondTransaction = firstTransaction.copyWith(
                     commodityCurrency: second.namespace + '::' + second.symbol,
                     amount: -_amount!,
                   );
-                  DoubleEntryTransaction transaction = DoubleEntryTransaction(
-                    AccountTransactionPair(first, firstTransaction),
-                    AccountTransactionPair(second, secondTransaction),
+                  Transaction transaction = Transaction(
+                    account: first,
+                    otherAccount: second,
+                    singleTransaction: firstTransaction,
+                    otherSingleTransaction: secondTransaction,
                   );
                   Navigator.of(context).pop(transaction);
                 }

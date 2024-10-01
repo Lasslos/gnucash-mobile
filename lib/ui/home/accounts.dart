@@ -51,13 +51,13 @@ class AccountTreeNodeWidget extends ConsumerWidget {
     }
     Account account = accountNode.account;
     List<AccountNode> descendants = accountNode.descendants.toList();
-    List<Transaction> transactions = [
-      ...ref.watch(transactionsProvider(account)),
+    List<SingleTransaction> transactions = [
+      ...ref.watch(singleTransactionsProvider(account)).values,
       for (AccountNode descendant in descendants)
-        ...ref.watch(transactionsProvider(descendant.account)),
+        ...ref.watch(singleTransactionsProvider(descendant.account)).values,
     ];
     double balance = 0;
-    for (Transaction transaction in transactions) {
+    for (SingleTransaction transaction in transactions) {
       balance += transaction.amount;
     }
 

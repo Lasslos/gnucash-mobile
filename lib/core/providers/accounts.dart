@@ -8,7 +8,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'accounts.g.dart';
 
-/// Stores and exposes the accounts.
+/// Stores and exposes the accounts in tree format.
 @Riverpod(keepAlive: true)
 class AccountTree extends _$AccountTree {
   @override
@@ -77,6 +77,9 @@ class AccountTree extends _$AccountTree {
   }
 }
 
+/// Exposes the accounts in a flat list.
+/// This watches [accountTreeProvider] and flattens the tree. Rebuilds when the tree changes.
+/// Though inefficient, this is fine as [accountTreeProvider] is not expected to change often.
 @riverpod
 List<Account> accountList(AccountListRef ref) {
   List<Account> allAccounts = [];
@@ -88,6 +91,14 @@ List<Account> accountList(AccountListRef ref) {
   return allAccounts;
 }
 
+/// Stores and exposes the accounts in a flat map.
+/// This watches [accountListProvider] and rebuilds when the list changes.
+@riverpod
+Map<String, Account> accountNameMap(AccountNameMapRef ref) {
+  return Map.fromEntries(ref.watch(accountListProvider).map((account) => MapEntry(account.fullName, account)));
+}
+
+/// Exposes the accounts in a flat list, excluding placeholder accounts.
 @riverpod
 List<Account> transactionAccountList(TransactionAccountListRef ref) {
   return ref.watch(accountListProvider).where((account) => !account.placeholder).toList();

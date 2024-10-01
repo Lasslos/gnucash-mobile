@@ -10,78 +10,93 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'transactions.g.dart';
 
 @riverpod
-class DoubleEntryTransactionList extends _$DoubleEntryTransactionList {
+class Transactions extends _$Transactions {
   @override
-  List<DoubleEntryTransaction> build() {
-    List<AccountTransactionPair> transactions = [];
-    for (Account account in ref.watch(accountListProvider)) {
-      transactions.addAll(
-        _getCached(account).map(
-          (transaction) => AccountTransactionPair(account, transaction),
-        ),
-      );
+  Transaction? build(String transactionId) {
+    String? json = sharedPreferences.getString('transactions.transaction.$transactionId');
+    if (json == null) {
+      return null;
     }
 
-    Map<String, List<AccountTransactionPair>> transactionMap = {};
-    for (AccountTransactionPair pair in transactions) {
-      transactionMap.putIfAbsent(pair.transaction.id, () => []);
-      transactionMap[pair.transaction.id]!.add(pair);
+    Map<String, dynamic> transactionJson = jsonDecode(json);
+
+    Account? account = ref.watch(
+      accountNameMapProvider.select(
+        (accountMap) => accountMap[transactionJson["accountFullName"]],
+      ),
+    );
+    Account? otherAccount = ref.watch(
+      accountNameMapProvider.select(
+        (accountMap) => accountMap[transactionJson["otherAccountFullName"]],
+      ),
+    );
+    if (account == null || otherAccount == null) {
+      Logger().w("Could not find account ${transactionJson["accountFullName"]} or ${transactionJson["otherAccountFullName"]} for transaction.");
+      return null;
     }
 
-    List<DoubleEntryTransaction> doubleEntryTransactions = [];
-    for (List<AccountTransactionPair> pairs in transactionMap.values) {
-      if (pairs.length == 2) {
-        doubleEntryTransactions.add(DoubleEntryTransaction(pairs[0], pairs[1]));
-      } else {
-        Logger().w("Transaction ${pairs[0].transaction.id} has ${pairs.length} entries");
-      }
+    SingleTransaction? singleTransaction = ref.watch(
+      singleTransactionsProvider(account).select(
+        (transactions) => transactions[transactionId],
+      ),
+    );
+    SingleTransaction? otherSingleTransaction = ref.watch(
+      singleTransactionsProvider(otherAccount).select(
+        (transactions) => transactions[transactionId],
+      ),
+    );
+    if (singleTransaction == null || otherSingleTransaction == null) {
+      Logger().w("Could not find single transaction for transaction.");
+      return null;
     }
 
-    return List.unmodifiable(doubleEntryTransactions);
+    return Transaction(
+      account: account,
+      otherAccount: otherAccount,
+      singleTransaction: singleTransaction,
+      otherSingleTransaction: otherSingleTransaction,
+    );
   }
 
-  void add(DoubleEntryTransaction transaction) {
-    AccountTransactionPair first = transaction.first;
-    AccountTransactionPair second = transaction.second;
-    ref.read(transactionsProvider(first.account).notifier)._add(first.transaction);
-    ref.read(transactionsProvider(second.account).notifier)._add(second.transaction);
-
-    state = List.unmodifiable([...state, transaction]);
-  }
-
-  void addAll(List<DoubleEntryTransaction> transactions) {
-    for (DoubleEntryTransaction transaction in transactions) {
-      AccountTransactionPair first = transaction.first;
-      AccountTransactionPair second = transaction.second;
-      ref.read(transactionsProvider(first.account).notifier)._add(first.transaction);
-      ref.read(transactionsProvider(second.account).notifier)._add(second.transaction);
+  Future<void> _setCached(Transaction? transaction) async {
+    if (transaction == null) {
+      await sharedPreferences.remove('transactions.transaction.$transactionId');
+      return;
     }
-    state = List.unmodifiable([...state, ...transactions]);
+    await sharedPreferences.setString(
+      'transactions.transaction.$transactionId',
+      jsonEncode(
+        {
+          "accountFullName": transaction.account.fullName,
+          "otherAccountFullName": transaction.otherAccount.fullName,
+        }
+      ),
+    );
   }
 
-  void remove(DoubleEntryTransaction transaction) {
-    AccountTransactionPair first = transaction.first;
-    AccountTransactionPair second = transaction.second;
-    ref.read(transactionsProvider(first.account).notifier)._remove(first.transaction);
-    ref.read(transactionsProvider(second.account).notifier)._remove(second.transaction);
-    state = List.unmodifiable([...state]..remove(transaction));
+  void set(Transaction transaction) async {
+    state = transaction;
+    ref.read(singleTransactionsProvider(transaction.account).notifier)._add(transaction.singleTransaction);
+    ref.read(singleTransactionsProvider(transaction.otherAccount).notifier)._add(transaction.otherSingleTransaction);
+    await _setCached(transaction);
+    // Refreshes the watched providers
+    ref.invalidateSelf();
   }
 
-  void clear() {
-    for (DoubleEntryTransaction transaction in state) {
-      AccountTransactionPair first = transaction.first;
-      AccountTransactionPair second = transaction.second;
-      ref.read(transactionsProvider(first.account).notifier)._remove(first.transaction);
-      ref.read(transactionsProvider(second.account).notifier)._remove(second.transaction);
-    }
-    state = List.unmodifiable([]);
+  void delete() async {
+    ref.read(singleTransactionsProvider(state!.account).notifier)._remove(state!.singleTransaction.id);
+    ref.read(singleTransactionsProvider(state!.otherAccount).notifier)._remove(state!.otherSingleTransaction.id);
+    state = null;
+    await _setCached(null);
+    // Refreshes the watched providers
+    ref.invalidateSelf();
   }
 }
 
 @Riverpod(keepAlive: true)
-class Transactions extends _$Transactions {
+class SingleTransactions extends _$SingleTransactions {
   @override
-  List<Transaction> build(Account account) {
+  Map<String, SingleTransaction> build(Account account) {
     ref.listenSelf((previous, next) {
       if (previous != next) {
         _setCached();
@@ -92,29 +107,31 @@ class Transactions extends _$Transactions {
 
   void _setCached() async {
     sharedPreferences.setString(
-      'transactions.account.$account',
+      'singleTransactions.account.${account.fullName}',
       jsonEncode(
-        state.map((transaction) => transaction.toJson()).toList(),
+        state.map((id, transaction) => MapEntry(id, transaction.toJson())),
       ),
     );
   }
 
-  void _add(Transaction transaction) {
-    state = List.unmodifiable([...state, transaction]);
+  Map<String, SingleTransaction> _getCached(Account account) {
+    String? json = sharedPreferences.getString('singleTransactions.account.${account.fullName}');
+    if (json == null) {
+      return {};
+    }
+    Map<String, dynamic> transactionsJson = jsonDecode(json);
+    Map<String, SingleTransaction> transactions = {};
+    for (String id in transactionsJson.keys) {
+      transactions[id] = SingleTransaction.fromJson(transactionsJson[id]);
+    }
+    return Map.unmodifiable(transactions);
   }
 
-  void _remove(Transaction transaction) {
-    state = List.unmodifiable([...state]..remove(transaction));
+  void _add(SingleTransaction transaction) {
+    state = Map.unmodifiable({...state, transaction.id: transaction});
   }
-}
 
-List<Transaction> _getCached(Account account) {
-  String? json = sharedPreferences.getString('transactions.account.$account');
-  if (json == null) {
-    return [];
+  void _remove(String transactionId) {
+    state = Map.unmodifiable({...state}..remove(transactionId));
   }
-  List<dynamic> transactions = jsonDecode(json);
-  return List.unmodifiable(
-    transactions.map((transaction) => Transaction.fromJson(transaction)).toList(),
-  );
 }
