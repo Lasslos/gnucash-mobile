@@ -30,19 +30,9 @@ const csvHeader = [
 
 @riverpod
 String transactionsCSV(TransactionsCSVRef ref) {
-  List<List<String>> csv = []..add(csvHeader);
-
-  List<MapEntry<Account, SingleTransaction>> transactions = [];
-  List<Account> accounts = ref.watch(accountListProvider);
-  // Iterate over all accounts and collect the transactions
-  for (Account account in accounts) {
-    Iterable<SingleTransaction> currentTransactions = ref.watch(singleTransactionsProvider(account)).values;
-    transactions.addAll(currentTransactions.map((transaction) => MapEntry(account, transaction)));
-  }
-
-  for (MapEntry<Account, SingleTransaction> pair in transactions) {
-    csv.add(transactionToCSV(pair.key, pair.value));
-  }
-
+  List<List<String>> csv = [
+    csvHeader,
+    ...ref.watch(transactionsProvider).expand(transactionToCSV),
+  ];
   return const ListToCsvConverter(eol: "\n").convert(csv);
 }
