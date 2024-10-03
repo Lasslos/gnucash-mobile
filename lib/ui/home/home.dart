@@ -107,7 +107,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   return;
                 }
                 Logger().i("Created transaction: $transaction");
-                ref.read(transactionsProvider(transaction.singleTransaction.id).notifier).set(transaction);
+                ref.read(transactionsProvider.notifier).add(transaction);
               },
             )
           : null,

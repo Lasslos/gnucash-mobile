@@ -51,14 +51,16 @@ class AccountTreeNodeWidget extends ConsumerWidget {
     }
     Account account = accountNode.account;
     List<AccountNode> descendants = accountNode.descendants.toList();
-    List<SingleTransaction> transactions = [
-      ...ref.watch(singleTransactionsProvider(account)).values,
+    List<Transaction> transactions = [
+      ...ref.watch(transactionsByAccountProvider(account)),
       for (AccountNode descendant in descendants)
-        ...ref.watch(singleTransactionsProvider(descendant.account)).values,
+        ...ref.watch(transactionsByAccountProvider(descendant.account)),
     ];
     double balance = 0;
-    for (SingleTransaction transaction in transactions) {
-      balance += transaction.amount;
+    for (Transaction transaction in transactions) {
+      balance += transaction.parts
+          .where((part) => part.account == account)
+          .fold(0, (sum, part) => sum + part.amount);
     }
 
     bool isExpanded = node.isExpanded;

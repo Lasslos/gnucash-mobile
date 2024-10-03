@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gnucash_mobile/core/models/account.dart';
 import 'package:gnucash_mobile/core/models/transaction.dart';
-import 'package:gnucash_mobile/core/providers/accounts.dart';
 import 'package:gnucash_mobile/core/providers/transactions.dart';
 import 'package:intl/intl.dart';
 
@@ -20,7 +19,7 @@ class TransactionsView extends ConsumerWidget {
     if (account == null) {
       return const _GlobalTransactionsView();
     } else {
-      return _SingleAccountTransactionsView(account: account!);
+      return _AccountTransactionsView(account: account!);
     }
   }
 }
@@ -31,29 +30,19 @@ class _GlobalTransactionsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    List<String> transactionIds = [
-      for (Account account in ref.watch(transactionAccountListProvider))
-        ...ref.watch(singleTransactionsProvider(account)).keys,
-    ];
-    Map<String, Transaction> transactionsMap = {
-      for (String transactionId in transactionIds)
-        transactionId: ref.watch(transactionsProvider(transactionId))!,
-    };
-    List<Transaction> transactions = transactionsMap.values.toList()..sort(
-      (a, b) => a.singleTransaction.compareTo(b.singleTransaction),
-    );
+    List<Transaction> transactions = ref.watch(transactionsProvider);
 
     return ListView(
       children: [
         for (Transaction transaction in transactions)
           TransactionSlidable(
-            key: ValueKey(transaction.singleTransaction),
+            key: ValueKey(transaction),
             child: TransactionWidget(transaction: transaction),
             onEdit: (context) {
               // TODO: Implement edit
             },
             onDelete: (context) {
-              ref.read(transactionsProvider(transaction.singleTransaction.id).notifier).delete();
+              ref.read(transactionsProvider.notifier).remove(transaction);
             },
           ),
       ],
@@ -61,17 +50,15 @@ class _GlobalTransactionsView extends ConsumerWidget {
   }
 }
 
-class _SingleAccountTransactionsView extends ConsumerWidget {
+class _AccountTransactionsView extends ConsumerWidget {
   // ignore: unused_element
-  const _SingleAccountTransactionsView({required this.account, super.key});
+  const _AccountTransactionsView({required this.account, super.key});
 
   final Account account;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    List<SingleTransaction> transactions = ref.watch(singleTransactionsProvider(account)).values.toList()..sort(
-      (a, b) => a.compareTo(b),
-    );
+    List<Transaction> transactions = ref.watch(transactionsByAccountProvider(account));
 
     return Scaffold(
       appBar: AppBar(
@@ -82,21 +69,21 @@ class _SingleAccountTransactionsView extends ConsumerWidget {
           // clear all transactions
           IconButton(
             icon: const Icon(Icons.delete),
-            onPressed: () => _deleteTransactions(context, ref, transactions),
+            onPressed: () => _deleteAllTransactions(context, ref, transactions),
           ),
         ],
       ),
       body: ListView(
         children: [
-          for (SingleTransaction singleTransaction in transactions)
+          for (Transaction transaction in transactions)
             TransactionSlidable(
-              key: ValueKey(singleTransaction),
-              child: SingleTransactionWidget(account: account, transaction: singleTransaction),
+              key: ValueKey(transaction),
+              child: TransactionPartWidget(account: account, transaction: transaction),
               onEdit: (context) {
                 // TODO: Implement edit
               },
               onDelete: (context) {
-                ref.read(transactionsProvider(singleTransaction.id).notifier).delete();
+                ref.read(transactionsProvider.notifier).remove(transaction);
               },
             ),
         ],
@@ -104,10 +91,10 @@ class _SingleAccountTransactionsView extends ConsumerWidget {
     );
   }
 
-  Future<void> _deleteTransactions(
+  Future<void> _deleteAllTransactions(
     BuildContext context,
     WidgetRef ref,
-    List<SingleTransaction> transactions,
+    List<Transaction> transactions,
   ) {
     return showDialog<void>(
       context: context,
@@ -136,8 +123,8 @@ class _SingleAccountTransactionsView extends ConsumerWidget {
                 style: TextStyle(inherit: true, color: Colors.red),
               ),
               onPressed: () {
-                for (SingleTransaction singleTransaction in transactions) {
-                  ref.read(transactionsProvider(singleTransaction.id).notifier).delete();
+                for (Transaction transaction in transactions) {
+                  ref.read(transactionsProvider.notifier).remove(transaction);
                 }
                 Navigator.of(context).pop();
               },
@@ -179,29 +166,32 @@ class TransactionSlidable extends ConsumerWidget {
   }
 }
 
-class SingleTransactionWidget extends StatelessWidget {
-  const SingleTransactionWidget({
+class TransactionPartWidget extends StatelessWidget {
+  const TransactionPartWidget({
     required this.account,
     required this.transaction,
     super.key,
   });
 
   final Account account;
-  final SingleTransaction transaction;
+  final Transaction transaction;
 
   @override
   Widget build(BuildContext context) {
     String subtitle = DateFormat.MMMd().format(transaction.date) + " | " + account.name + (transaction.notes.isNotEmpty ? "\n" + transaction.notes : "");
+    TransactionPart transactionPart = transaction.parts.firstWhere((part) => part.account == account);
+    double amount = transactionPart.amount * (account.type.debitIsNegative ? -1 : 1);
+
     return ListTile(
       title: Text(transaction.description),
       subtitle: Text(subtitle),
       isThreeLine: transaction.notes.isNotEmpty,
       trailing: Text(
-        transaction.amount.toStringAsFixed(2),
+        amount.toStringAsFixed(2),
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: transaction.amount.isNegative ? Colors.red : null,
-            ),
+          fontWeight: FontWeight.bold,
+          color: amount.isNegative ? Colors.red : null,
+        ),
       ),
     );
   }
@@ -214,73 +204,45 @@ class TransactionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SingleTransaction transaction = this.transaction.singleTransaction;
-    SingleTransaction otherTransaction = this.transaction.otherSingleTransaction;
-    Account account = this.transaction.account;
-    Account otherAccount = this.transaction.otherAccount;
-
-    String subtitle = DateFormat.MMMd().format(transaction.date);
-    String topLine = account.name;
-    String bottomLine = otherAccount.name;
-
-    double amount = transaction.amount * (account.type.debitIsNegative ? -1 : 1);
-    double otherAmount = otherTransaction.amount * (otherAccount.type.debitIsNegative ? -1 : 1);
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: Row(
+      child: Column(
         children: [
-          SizedBox(
-            width: 130,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  transaction.description,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                Text(
-                  subtitle,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
+          Text(
+            transaction.description + " - " + DateFormat.MMMd().format(transaction.date),
+            style: Theme.of(context).textTheme.bodyLarge,
           ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                topLine,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              Text(
-                bottomLine,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
+          DataTable(
+            columns: const [
+              DataColumn(label: Text("Account")),
+              DataColumn(label: Text("Debit")),
+              DataColumn(label: Text("Credit")),
             ],
-          ),
-          const Spacer(),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                (amount.isNegative ? "" : "+") + amount.toStringAsFixed(2),
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: amount.isNegative ? Colors.red : Colors.green,
-                    ),
-              ),
-              Text(
-                (otherAmount.isNegative ? "" : "+") + otherAmount.toStringAsFixed(2),
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: otherAmount.isNegative ? Colors.red : Colors.green,
-                    ),
-              ),
+            rows: [
+              for (TransactionPart part in transaction.parts)
+                DataRow(
+                  cells: [
+                    DataCell(Text(part.account.name)),
+                    DataCell(Text(part.amount.isNegative ? "" : part.amount.toStringAsFixed(2))),
+                    DataCell(Text(part.amount.isNegative ? (-part.amount).toStringAsFixed(2) : "")),
+                  ],
+                ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTransactionPart(BuildContext context, TransactionPart part) {
+    return ListTile(
+      title: Text(part.account.name),
+      trailing: Text(
+        part.amount.toStringAsFixed(2),
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: part.amount.isNegative ? Colors.red : null,
+        ),
       ),
     );
   }
