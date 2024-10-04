@@ -11,16 +11,15 @@ double balance(BalanceRef ref, AccountNode accountNode) {
   Account account = accountNode.account;
   Set<Account> accountWithDescendants = accountNode.descendants.map((node) => node.account).toSet()
     ..add(account);
-  List<Transaction> transactions = [
-    for (Account descendant in accountWithDescendants)
-      ...ref.watch(transactionsByAccountProvider(descendant)),
-  ];
   double balance = 0;
-  for (Transaction transaction in transactions) {
-    balance += transaction.parts
-        .where((part) => accountWithDescendants.contains(part.account))
-        .fold(0, (sum, part) => sum + part.amount);
+  for (Account account in accountWithDescendants) {
+    for (Transaction transaction in ref.watch(transactionsByAccountProvider(account))) {
+      balance += transaction.parts
+          .where((part) => accountWithDescendants.contains(part.account))
+          .fold(0, (sum, part) => sum + part.amount);
+    }
   }
+
   if (account.type.debitIsNegative) {
     balance = -balance;
   }
