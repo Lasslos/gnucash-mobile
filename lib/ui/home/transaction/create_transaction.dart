@@ -1,12 +1,7 @@
-import 'package:animated_tree_view/animated_tree_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gnucash_mobile/core/models/account.dart';
-import 'package:gnucash_mobile/core/models/account_node.dart';
 import 'package:gnucash_mobile/core/models/transaction.dart';
-import 'package:gnucash_mobile/core/providers/accounts.dart';
 import 'package:gnucash_mobile/ui/home/transaction/transaction_parts_field.dart';
-import 'package:uuid/uuid.dart';
 
 Future<Transaction?> showCreateTransactionDialog(BuildContext context) {
   return showDialog(
@@ -84,14 +79,15 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.only(left: 12.0, right: 16.0),
-                    child: Icon(
+                  Container(
+                    padding: const EdgeInsets.only(left: 12.0, right: 16.0),
+                    height: 56,
+                    alignment: Alignment.centerLeft,
+                    child: const Icon(
                       Icons.today,
                     ),
                   ),
                   Flexible(
-                    flex: 2,
                     child: TextFormField(
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
@@ -120,7 +116,6 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
                     width: 8,
                   ),
                   Flexible(
-                    flex: 3,
                     child: TextFormField(
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
@@ -146,30 +141,6 @@ class __CreateTransactionViewState extends ConsumerState<_CreateTransactionView>
                 height: 32,
               ),
               TransactionPartsFormField(
-                validator: (parts) {
-                  if (parts == null || parts.isEmpty) {
-                    return 'At least one part is required';
-                  }
-                  bool hasNonTrailingNull = false;
-                  bool hasSeenNull = false;
-                  for (TransactionPart? part in parts) {
-                    if (part == null) {
-                      hasSeenNull = true;
-                    } else if (hasSeenNull) {
-                      hasNonTrailingNull = true;
-                      break;
-                    }
-                  }
-                  if (hasNonTrailingNull) {
-                    return 'All parts must be filled';
-                  }
-
-                  // Check if sum of parts is zero
-                  double sum = parts.nonNulls.fold(0, (sum, part) => sum + part.amount);
-                  if (sum != 0) {
-                    return 'Sum of parts must be zero';
-                  }
-                },
                 onSaved: (List<TransactionPart?>? parts) {
                   if (parts == null) {
                     return;

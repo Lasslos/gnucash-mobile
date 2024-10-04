@@ -1,125 +1,178 @@
-import 'package:animated_tree_view/helpers/collection_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gnucash_mobile/core/models/account.dart';
 import 'package:gnucash_mobile/core/models/transaction.dart';
 import 'package:gnucash_mobile/ui/home/transaction/account_field.dart';
 
-class TransactionPartsFormField extends FormField<List<TransactionPart?>> {
+class TransactionPartsFormField extends FormField<List<TransactionPart?>?> {
   TransactionPartsFormField({
-    required super.validator,
     required super.onSaved,
     super.key,
-    this.allowNonTrailingNull = false,
   }) : super(
-    initialValue: [null, null],
-    builder: (state) {
-      return TransactionPartsField(
-        allowNonTrailingNull: allowNonTrailingNull,
-        onChanged: (parts) {
-          state.didChange(parts);
-        },
-        errorText: state.errorText,
-      );
-    },
-  );
-
-  final bool allowNonTrailingNull;
+          initialValue: [null, null],
+          validator: (List<TransactionPart?>? parts) {
+            if (parts == null || parts.isEmpty) {
+              return 'Required';
+            }
+            List<TransactionPart> partsNotNull = parts.nonNulls.toList();
+            // Check if sum of parts is zero
+            double sum = partsNotNull.fold(0, (sum, part) => sum + part.amount);
+            if (sum != 0) {
+              return 'Sum of parts must be zero';
+            }
+            return null;
+          },
+          builder: (state) {
+            return _TransactionPartsFormFieldWidget(
+              onChanged: state.didChange,
+              errorText: state.errorText,
+            );
+          },
+        );
 }
 
+class _TransactionPartsFormFieldWidget extends StatefulWidget {
+  const _TransactionPartsFormFieldWidget({required this.onChanged, super.key, this.errorText});
 
-class TransactionPartsField extends ConsumerStatefulWidget {
-  const TransactionPartsField({required this.onChanged, this.errorText, this.allowNonTrailingNull = false, super.key});
-
-  final void Function(List<TransactionPart?>) onChanged;
   final String? errorText;
-  final bool allowNonTrailingNull;
+  final void Function(List<TransactionPart?>?) onChanged;
 
   @override
-  ConsumerState<TransactionPartsField> createState() => _TransactionPartsFieldState();
+  State<_TransactionPartsFormFieldWidget> createState() => _TransactionPartsFormFieldWidgetState();
 }
 
-class _TransactionPartsFieldState extends ConsumerState<TransactionPartsField> {
-  late final List<GlobalKey<_TransactionPartFieldState>> _partKeys;
-  late final List<TransactionPart?> _parts;
+class _TransactionPartsFormFieldWidgetState extends State<_TransactionPartsFormFieldWidget> {
+  late final List<TransactionPart?> parts;
+  late final List<GlobalKey<FormFieldState<TransactionPart>>> _partKeys;
 
   @override
   void initState() {
     super.initState();
-    _partKeys = [
-      GlobalKey<_TransactionPartFieldState>(),
-      GlobalKey<_TransactionPartFieldState>(),
-    ];
-    _parts = [null, null];
+    parts = [null, null];
+    _partKeys = [GlobalKey(), GlobalKey()];
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListBody(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.errorText != null) Text(
-          widget.errorText!,
-          style: const TextStyle(
-            color: Colors.red,
+        for (int i = 0; i < parts.length; i++) ...[
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 56,
+                  alignment: Alignment.center,
+                  child: i >= 2
+                      ? IconButton(
+                          icon: const Icon(Icons.remove),
+                          padding: const EdgeInsets.only(left: 12.0, right: 16.0),
+                          color: Theme.of(context).colorScheme.onSurface,
+                          onPressed: () {
+                            setState(() {
+                              parts.removeAt(i);
+                              _partKeys.removeAt(i);
+                            });
+                            widget.onChanged(parts);
+                          },
+                        )
+                      : const SizedBox(width: 52),
+                ),
+                Expanded(
+                  child: TransactionPartFormField(
+                    key: _partKeys[i],
+                    validator: (part) {
+                      if (part == null) {
+                        return 'Required';
+                      }
+                      return null;
+                    },
+                    onChanged: (part) {
+                      parts[i] = part;
+                      widget.onChanged(parts);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(),
+          const SizedBox(
+            height: 8,
+          ),
+        ],
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          switchInCurve: Curves.easeInOut,
+          switchOutCurve: Curves.easeInOut,
+          child: widget.errorText == null
+              ? const SizedBox()
+              : Padding(
+            padding: const EdgeInsets.only(left: 12.0, right: 16.0, bottom: 8.0),
+            child: Text(
+              widget.errorText!,
+              style: Theme.of(context).textTheme.bodySmall?.apply(
+                color: Theme.of(context).colorScheme.error,
+              ),
+            ),
           ),
         ),
-        for (int i = 0; i < _partKeys.length; i++)
-          TransactionPartField(
-            key: _partKeys[i],
-            onChanged: (part) {
-              _parts[i] = part;
-              if (_parts.length == 2 && _parts.filterNotNull().length == 1) {
-                // Autofill the other amount to be the negative of the first amount
-                int otherIndex = 1 - i;
-                if (_parts[otherIndex] == null) {
-                  assert(part != null, "If the other part is null, this part must not be null");
-                  _partKeys[otherIndex].currentState!.amount = -part!.amount;
-                }
-              }
-              widget.onChanged(_parts);
+        Padding(
+          padding: const EdgeInsets.only(left: 12.0),
+          child: OutlinedButton.icon(
+            icon: const Icon(Icons.add),
+            label: const Text('Add another part'),
+            onPressed: () {
+              setState(() {
+                parts.add(null);
+                _partKeys.add(GlobalKey());
+              });
+              widget.onChanged(parts);
             },
-            errorText: () {
-              if (_parts[i] != null && widget.allowNonTrailingNull) {
-                return "";
-              }
-              bool partIsTrailing = true;
-              for (int j = i + 1; j < _parts.length; j++) {
-                if (_parts[j] != null) {
-                  partIsTrailing = false;
-                  break;
-                }
-              }
-              if (partIsTrailing) {
-                return "This part cannot be null";
-              }
-              return "";
-            }(),
           ),
-        TextButton(
-          onPressed: () {
-            setState(() {
-              _partKeys.add(GlobalKey<_TransactionPartFieldState>());
-              _parts.add(null);
-            });
-          },
-          child: const Text('Add another part'),
         ),
       ],
     );
   }
 }
 
-class TransactionPartField extends ConsumerStatefulWidget {
-  const TransactionPartField({required this.onChanged, this.errorText = "", super.key});
+class TransactionPartFormField extends FormField<TransactionPart> {
+  TransactionPartFormField({
+    required super.validator,
+    required this.onChanged,
+    super.initialValue,
+    super.key,
+  }) : super(
+          builder: (state) {
+            return TransactionPartField(
+              onChanged: (part) {
+                state.didChange(part);
+                onChanged(part);
+              },
+              errorText: state.errorText,
+            );
+          },
+        );
 
   final void Function(TransactionPart?) onChanged;
-  final String errorText;
+}
+
+class TransactionPartField extends ConsumerStatefulWidget {
+  const TransactionPartField({required this.onChanged, this.errorText, super.key});
+
+  final void Function(TransactionPart?) onChanged;
+  final String? errorText;
 
   @override
   ConsumerState createState() => _TransactionPartFieldState();
 }
 
 class _TransactionPartFieldState extends ConsumerState<TransactionPartField> {
+  TransactionPart? part;
   Account? _account;
   double? _amount;
 
@@ -154,27 +207,62 @@ class _TransactionPartFieldState extends ConsumerState<TransactionPartField> {
       amountSigned = _amount! * (_account!.type.debitIsNegative ? -1 : 1);
     }
 
-    return ListBody(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AccountField(
-          onChanged: (account) {
-            setState(() {
-              _account = account;
-            });
-            _onChanged();
-          },
-          labelText: "",
-          errorText: widget.errorText,
+        Row(
+          children: [
+            Flexible(
+              flex: 2,
+              child: AccountField(
+                onChanged: (account) {
+                  setState(() {
+                    _account = account;
+                  });
+                  _onChanged();
+                },
+                labelText: "",
+              ),
+            ),
+            const SizedBox(
+              width: 8,
+            ),
+            Flexible(
+              child: TextField(
+                enabled: _account != null && _amount != null,
+                readOnly: true,
+                ignorePointers: true,
+                controller: TextEditingController(
+                  text: () {
+                    if (amountSigned == null) {
+                      return '';
+                    }
+                    return amountSigned.toStringAsFixed(2);
+                  }(),
+                ),
+                style: TextStyle(
+                  color: () {
+                    if (amountSigned != null && amountSigned < 0) {
+                      return Colors.red;
+                    }
+                    return null;
+                  }(),
+                ),
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Result',
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(
+          height: 8,
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.only(left: 12.0, right: 16.0),
-              child: Icon(
-                Icons.attach_money,
-              ),
-            ),
             Flexible(
               child: TextField(
                 enabled: _account != null,
@@ -219,46 +307,44 @@ class _TransactionPartFieldState extends ConsumerState<TransactionPartField> {
                 controller: _creditAmountController,
               ),
             ),
-            const SizedBox(
-              width: 8,
-            ),
-            Flexible(
-              child: TextField(
-                enabled: _account != null,
-                readOnly: true,
-                controller: TextEditingController(
-                  text: () {
-                    if (amountSigned == null) {
-                      return '';
-                    }
-                    return amountSigned.toStringAsFixed(2);
-                  }(),
-                ),
-                style: TextStyle(
-                  color: () {
-                    if (amountSigned != null && amountSigned < 0) {
-                      return Colors.red;
-                    }
-                    return null;
-                  }(),
-                ),
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Result',
-                ),
-              ),
-            ),
           ],
+        ),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          switchInCurve: Curves.easeInOut,
+          switchOutCurve: Curves.easeInOut,
+          child: widget.errorText == null
+              ? const SizedBox()
+              : Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    widget.errorText!,
+                    style: Theme.of(context).textTheme.bodySmall?.apply(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                  ),
+                ),
         ),
       ],
     );
   }
 
   void _onChanged() {
+    TransactionPart? part;
+
     if (_account != null && _amount != null) {
-      widget.onChanged(TransactionPart(account: _account!, amount: _amount!));
+      part = TransactionPart(
+        account: _account!,
+        amount: _amount!,
+      );
     } else {
-      widget.onChanged(null);
+      part = null;
+    }
+    if (part != this.part) {
+      widget.onChanged(part);
+      setState(() {
+        this.part = part;
+      });
     }
   }
 }

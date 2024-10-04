@@ -34,7 +34,7 @@ class AccountField extends ConsumerStatefulWidget {
   final String labelText;
   final String? errorText;
 
-  const AccountField({required this.onChanged, required this.labelText, required this.errorText, super.key});
+  const AccountField({required this.onChanged, required this.labelText, this.errorText, super.key});
 
   @override
   ConsumerState createState() => _AccountFieldState();

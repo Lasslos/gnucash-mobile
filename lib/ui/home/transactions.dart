@@ -192,8 +192,8 @@ class TransactionPartWidget extends StatelessWidget {
           Text(
             amount.toStringAsFixed(2),
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: amount.isNegative ? Colors.red : null,
-            ),
+                  color: amount.isNegative ? Colors.red : null,
+                ),
           ),
         ],
       ),
@@ -208,6 +208,46 @@ class TransactionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
+    TextStyle? subtitleStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+
+    List<TableRow> rows = [];
+    for (TransactionPart part in transaction.parts) {
+      double amountUnsigned = part.amount;
+      double amount = amountUnsigned * (part.account.type.debitIsNegative ? -1 : 1);
+      bool isDebit = !amountUnsigned.isNegative;
+      TextStyle? numberStyle = theme.textTheme.bodyMedium?.apply(
+        color: amount.isNegative ? Colors.red : null,
+      );
+
+      rows.add(
+        TableRow(
+          children: [
+            Text(
+              part.account.name,
+              style: subtitleStyle,
+            ),
+            const SizedBox(width: 8),
+            isDebit
+                ? Text(
+                    amount.toStringAsFixed(2),
+                    style: numberStyle,
+                  )
+                : const SizedBox.shrink(),
+            const SizedBox(width: 8),
+            !isDebit
+                ? Text(
+                    amount.toStringAsFixed(2),
+                    style: numberStyle,
+                  )
+                : const SizedBox.shrink(),
+          ],
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: Column(
@@ -225,18 +265,7 @@ class TransactionWidget extends StatelessWidget {
               3: IntrinsicColumnWidth(),
               4: IntrinsicColumnWidth(),
             },
-           children: [
-              for (TransactionPart part in transaction.parts)
-                TableRow(
-                  children: [
-                    Text(part.account.name),
-                    const SizedBox(width: 8),
-                    Text(part.amount.isNegative ? "" : part.amount.toStringAsFixed(2)),
-                    const SizedBox(width: 8),
-                    Text(part.amount.isNegative ? (-part.amount).toStringAsFixed(2) : ""),
-                  ],
-                ),
-            ],
+            children: rows,
           ),
         ],
       ),
