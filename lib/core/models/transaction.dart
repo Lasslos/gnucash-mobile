@@ -26,7 +26,7 @@ class TransactionPart with _$TransactionPart {
 class Transaction with _$Transaction implements Comparable<Transaction> {
   @Assert('parts.length >= 2', 'A transaction must have at least two parts')
   @Assert('parts.map((part) => part.amount).reduce((a, b) => a + b) == 0', 'The sum of all parts must be zero')
-  const factory Transaction({
+  factory Transaction({
     required List<TransactionPart> parts,
 
     /// The type of commodity and currency used in the transaction.

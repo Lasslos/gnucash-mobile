@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gnucash_mobile/core/models/account.dart';
 import 'package:gnucash_mobile/core/models/account_node.dart';
-import 'package:gnucash_mobile/core/models/transaction.dart';
 import 'package:gnucash_mobile/core/providers/accounts.dart';
-import 'package:gnucash_mobile/core/providers/transactions.dart';
+import 'package:gnucash_mobile/core/providers/balance.dart';
 import 'package:gnucash_mobile/ui/home/transactions.dart';
 
 class AccountsScreen extends ConsumerWidget {
@@ -49,22 +48,11 @@ class AccountTreeNodeWidget extends ConsumerWidget {
     if (accountNode == null) {
       return const SizedBox.shrink();
     }
-    Account account = accountNode.account;
-    List<AccountNode> descendants = accountNode.descendants.toList();
-    List<Transaction> transactions = [
-      ...ref.watch(transactionsByAccountProvider(account)),
-      for (AccountNode descendant in descendants)
-        ...ref.watch(transactionsByAccountProvider(descendant.account)),
-    ];
-    double balance = 0;
-    for (Transaction transaction in transactions) {
-      balance += transaction.parts
-          .where((part) => part.account == account)
-          .fold(0, (sum, part) => sum + part.amount);
-    }
 
     bool isExpanded = node.isExpanded;
     bool hasChildren = !node.isLeaf;
+    double balance = ref.watch(balanceProvider(accountNode));
+    Account account = accountNode.account;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -93,9 +81,9 @@ class AccountTreeNodeWidget extends ConsumerWidget {
         trailing: Text(
           balance.toStringAsFixed(2),
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: balance.isNegative ? Colors.red : null,
-              ),
+            fontWeight: FontWeight.bold,
+            color: balance.isNegative ? Colors.red : null,
+          ),
         ),
       ),
     );
