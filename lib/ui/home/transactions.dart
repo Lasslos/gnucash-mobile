@@ -186,12 +186,16 @@ class TransactionPartWidget extends StatelessWidget {
       title: Text(transaction.description),
       subtitle: Text(subtitle),
       isThreeLine: transaction.notes.isNotEmpty,
-      trailing: Text(
-        amount.toStringAsFixed(2),
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: amount.isNegative ? Colors.red : null,
-        ),
+      trailing: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            amount.toStringAsFixed(2),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: amount.isNegative ? Colors.red : null,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -207,42 +211,34 @@ class TransactionWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             transaction.description + " - " + DateFormat.MMMd().format(transaction.date),
             style: Theme.of(context).textTheme.bodyLarge,
           ),
-          DataTable(
-            columns: const [
-              DataColumn(label: Text("Account")),
-              DataColumn(label: Text("Debit")),
-              DataColumn(label: Text("Credit")),
-            ],
-            rows: [
+          Table(
+            columnWidths: const {
+              0: FlexColumnWidth(),
+              1: IntrinsicColumnWidth(),
+              2: IntrinsicColumnWidth(),
+              3: IntrinsicColumnWidth(),
+              4: IntrinsicColumnWidth(),
+            },
+           children: [
               for (TransactionPart part in transaction.parts)
-                DataRow(
-                  cells: [
-                    DataCell(Text(part.account.name)),
-                    DataCell(Text(part.amount.isNegative ? "" : part.amount.toStringAsFixed(2))),
-                    DataCell(Text(part.amount.isNegative ? (-part.amount).toStringAsFixed(2) : "")),
+                TableRow(
+                  children: [
+                    Text(part.account.name),
+                    const SizedBox(width: 8),
+                    Text(part.amount.isNegative ? "" : part.amount.toStringAsFixed(2)),
+                    const SizedBox(width: 8),
+                    Text(part.amount.isNegative ? (-part.amount).toStringAsFixed(2) : ""),
                   ],
                 ),
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildTransactionPart(BuildContext context, TransactionPart part) {
-    return ListTile(
-      title: Text(part.account.name),
-      trailing: Text(
-        part.amount.toStringAsFixed(2),
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: part.amount.isNegative ? Colors.red : null,
-        ),
       ),
     );
   }
