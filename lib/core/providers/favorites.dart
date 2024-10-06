@@ -6,52 +6,54 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'favorites.g.dart';
 
-@riverpod
-class FavoriteDebitAccount extends _$FavoriteDebitAccount {
-  @override
-  Account? build() {
-    String? json = sharedPreferences.getString('favoriteDebitAccount');
+mixin FavoriteAccounts on AutoDisposeNotifier<List<Account>> {
+  String get _sharedPreferencesKey;
+
+  List<Account> _internBuild() {
+    ref.listenSelf((previous, next) {
+      if (previous != next) {
+        _setCachedAccounts(next);
+      }
+    });
+    return _getCachedAccounts();
+  }
+
+  List<Account> _getCachedAccounts() {
+    String? json = sharedPreferences.getString(_sharedPreferencesKey);
     if (json == null) {
-      return null;
+      return [];
     }
-    return Account.fromJson(jsonDecode(json));
+    List<dynamic> decoded = jsonDecode(json);
+    return decoded.map((e) => Account.fromJson(e)).toList();
   }
-
-  void set(Account account) {
+  void _setCachedAccounts(List<Account> accounts) {
     sharedPreferences.setString(
-      'favoriteDebitAccount',
-      jsonEncode(account.toJson()),
+      _sharedPreferencesKey,
+      jsonEncode(accounts.map((e) => e.toJson()).toList()),
     );
-    state = account;
   }
 
+  void push(Account account) {
+    state = [account, ...state.skipWhile((e) => e == account)].take(5).toList();
+  }
   void clear() {
-    sharedPreferences.remove('favoriteDebitAccount');
-    state = null;
+    state = [];
   }
 }
 
+
 @riverpod
-class FavoriteCreditAccount extends _$FavoriteCreditAccount {
+class FavoriteDebitAccounts extends _$FavoriteDebitAccounts with FavoriteAccounts {
   @override
-  Account? build() {
-    String? json = sharedPreferences.getString('favoriteCreditAccount');
-    if (json == null) {
-      return null;
-    }
-    return Account.fromJson(jsonDecode(json));
-  }
+  String get _sharedPreferencesKey => 'favoriteDebitAccounts';
+  @override
+  List<Account> build() => _internBuild();
+}
 
-  void set(Account account) {
-    sharedPreferences.setString(
-      'favoriteCreditAccount',
-      jsonEncode(account.toJson()),
-    );
-    state = account;
-  }
-
-  void clear() {
-    sharedPreferences.remove('favoriteCreditAccount');
-    state = null;
-  }
+@riverpod
+class FavoriteCreditAccounts extends _$FavoriteCreditAccounts with FavoriteAccounts {
+  @override
+  String get _sharedPreferencesKey => 'favoriteCreditAccounts';
+  @override
+  List<Account> build() => _internBuild();
 }
