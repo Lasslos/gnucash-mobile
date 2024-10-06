@@ -25,11 +25,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   set _selectedIndex(int value) {
     setState(() {
-      if (value < _selectedIndexIntern) {
-        _reverseDirection = true;
-      } else {
-        _reverseDirection = false;
-      }
+      _reverseDirection = value < _selectedIndexIntern;
       _selectedIndexIntern = value;
     });
   }
