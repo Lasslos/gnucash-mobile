@@ -16,17 +16,17 @@ class AccountFormField extends FormField<Account?> {
     required super.validator,
     super.key,
   }) : super(
-    builder: (state) {
-      return AccountField(
-        onChanged: (account) {
-          state.didChange(account);
-          onChanged(account);
-        },
-        labelText: labelText,
-        errorText: state.errorText,
-      );
-    },
-  );
+          builder: (state) {
+            return AccountField(
+              onChanged: (account) {
+                state.didChange(account);
+                onChanged(account);
+              },
+              labelText: labelText,
+              errorText: state.errorText,
+            );
+          },
+        );
 }
 
 class AccountField extends ConsumerStatefulWidget {
@@ -69,78 +69,88 @@ class _AccountFieldState extends ConsumerState<AccountField> {
         errorText: widget.errorText,
       ),
       onTap: () async {
-        showModalBottomSheet(
-          enableDrag: false,
-          context: context,
-          isScrollControlled: true,
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.8,
-          ),
-          builder: (context) {
-            TreeNode<Account> accountTree = TreeNode<Account>.root();
-            TreeNode<Account> buildAccountTree(AccountNode account) {
-              TreeNode<Account> node = TreeNode<Account>(data: account.account)..addAll(account.children.map(buildAccountTree));
-              return node;
-            }
+        List<AccountNode> accountNodes = ref.read(accountTreeProvider);
+        Account? account = await showAccountPickerDialog(context: context, accountNodes: accountNodes);
+        if (account != null) {
+          setState(() {
+            this.account = account;
+          });
+          widget.onChanged(account);
+        }
+      },
+    );
+  }
+}
 
-            List<AccountNode> accountNodes = ref.watch(accountTreeProvider);
-            accountTree.addAll(accountNodes.map(buildAccountTree));
+Future<Account?> showAccountPickerDialog({
+  required BuildContext context,
+  required List<AccountNode> accountNodes,
+}) async {
+  return showModalBottomSheet<Account?>(
+    enableDrag: false,
+    context: context,
+    isScrollControlled: true,
+    constraints: BoxConstraints(
+      maxHeight: MediaQuery.of(context).size.height * 0.8,
+    ),
+    builder: (context) {
+      TreeNode<Account> accountTree = TreeNode<Account>.root();
+      TreeNode<Account> buildAccountTree(AccountNode account) {
+        TreeNode<Account> node = TreeNode<Account>(data: account.account)..addAll(account.children.map(buildAccountTree));
+        return node;
+      }
 
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: CustomScrollView(
-                shrinkWrap: true,
-                controller: scrollController,
-                slivers: [
-                  SliverTreeView.simple(
-                    scrollController: scrollController,
-                    showRootNode: false,
-                    tree: accountTree,
-                    expansionIndicatorBuilder: (context, node) {
-                      return NoExpansionIndicator(tree: node);
-                    },
-                    expansionBehavior: ExpansionBehavior.collapseOthersAndSnapToTop,
-                    builder: (context, node) {
-                      Account? account = node.data;
-                      if (account == null) {
-                        return const SizedBox.shrink();
-                      }
-                      bool isExpanded = node.isExpanded;
-                      bool hasChildren = !node.isLeaf;
+      accountTree.addAll(accountNodes.map(buildAccountTree));
+      AutoScrollController scrollController = AutoScrollController();
 
-                      return Card(
-                        clipBehavior: Clip.antiAlias,
-                        surfaceTintColor: account.placeholder ? Theme.of(context).disabledColor : null,
-                        child: ListTile(
-                          leading: hasChildren
-                              ? AnimatedRotation(
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: CustomScrollView(
+          shrinkWrap: true,
+          controller: scrollController,
+          slivers: [
+            SliverTreeView.simple(
+              scrollController: scrollController,
+              showRootNode: false,
+              tree: accountTree,
+              expansionIndicatorBuilder: (context, node) {
+                return NoExpansionIndicator(tree: node);
+              },
+              expansionBehavior: ExpansionBehavior.collapseOthersAndSnapToTop,
+              builder: (context, node) {
+                Account? account = node.data;
+                if (account == null) {
+                  return const SizedBox.shrink();
+                }
+                bool isExpanded = node.isExpanded;
+                bool hasChildren = !node.isLeaf;
+
+                return Card(
+                  clipBehavior: Clip.antiAlias,
+                  surfaceTintColor: account.placeholder ? Theme.of(context).colorScheme.surfaceContainerLow : Theme.of(context).colorScheme.surfaceContainerHigh,
+                  child: ListTile(
+                    leading: hasChildren
+                        ? AnimatedRotation(
                             turns: isExpanded ? 0.25 : 0,
                             duration: const Duration(milliseconds: 300),
                             curve: Curves.easeInOut,
                             child: const Icon(Icons.arrow_right),
                           )
-                              : null,
-                          title: Text(account.name),
-                          trailing: account.placeholder ? null : const Icon(Icons.arrow_forward),
-                          onTap: account.placeholder
-                              ? null
-                              : () {
-                            setState(() {
-                              this.account = account;
-                            });
-                            widget.onChanged(account);
-                            Navigator.of(context).pop();
+                        : null,
+                    title: Text(account.name),
+                    trailing: account.placeholder ? null : const Icon(Icons.arrow_forward),
+                    onTap: account.placeholder
+                        ? null
+                        : () {
+                            Navigator.of(context).pop(account);
                           },
-                        ),
-                      );
-                    },
                   ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
+                );
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }
