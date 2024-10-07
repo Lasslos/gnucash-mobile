@@ -43,17 +43,17 @@ mixin FavoriteAccounts on AutoDisposeNotifier<List<Account>> {
 
 
 @riverpod
-class FavoriteDebitAccounts extends _$FavoriteDebitAccounts with FavoriteAccounts {
+class FirstAccountFavorites extends _$FirstAccountFavorites with FavoriteAccounts {
   @override
-  String get _sharedPreferencesKey => 'favoriteDebitAccounts';
+  String get _sharedPreferencesKey => 'firstAccountFavorites';
   @override
   List<Account> build() => _internBuild();
 }
 
 @riverpod
-class FavoriteCreditAccounts extends _$FavoriteCreditAccounts with FavoriteAccounts {
+class SecondAccountFavorites extends _$SecondAccountFavorites with FavoriteAccounts {
   @override
-  String get _sharedPreferencesKey => 'favoriteCreditAccounts';
+  String get _sharedPreferencesKey => 'secondAccountFavorites';
   @override
   List<Account> build() => _internBuild();
 }
