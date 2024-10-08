@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gnucash_mobile/core/models/transaction.dart';
 import 'package:gnucash_mobile/ui/home/transaction/transaction_parts_field.dart';
 
-Future<Transaction?> showCreateTransactionDialog(BuildContext context) {
+Future<Transaction?> showCreateTransactionDialog2(BuildContext context) {
   return showDialog(
     context: context,
     builder: (context) {

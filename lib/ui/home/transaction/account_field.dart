@@ -127,7 +127,7 @@ Future<Account?> showAccountPickerDialog({
 
                 return Card(
                   clipBehavior: Clip.antiAlias,
-                  surfaceTintColor: account.placeholder ? Theme.of(context).colorScheme.surfaceContainerLow : Theme.of(context).colorScheme.surfaceContainerHigh,
+                  color: account.placeholder ? Theme.of(context).colorScheme.surfaceContainerHigh : Theme.of(context).colorScheme.surfaceContainerHighest,
                   child: ListTile(
                     leading: hasChildren
                         ? AnimatedRotation(
@@ -138,8 +138,13 @@ Future<Account?> showAccountPickerDialog({
                           )
                         : null,
                     title: Text(account.name),
-                    trailing: account.placeholder ? null : const Icon(Icons.arrow_forward),
-                    onTap: account.placeholder
+                    trailing: account.placeholder ? null : IconButton(
+                      icon: const Icon(Icons.arrow_forward),
+                      onPressed: () {
+                        Navigator.of(context).pop(account);
+                      },
+                    ),
+                    onTap: account.placeholder || hasChildren
                         ? null
                         : () {
                             Navigator.of(context).pop(account);

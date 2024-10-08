@@ -7,6 +7,7 @@ import 'package:gnucash_mobile/core/providers/transactions.dart';
 import 'package:gnucash_mobile/ui/export/export.dart';
 import 'package:gnucash_mobile/ui/home/accounts.dart';
 import 'package:gnucash_mobile/ui/home/transaction/create_transaction.dart';
+import 'package:gnucash_mobile/ui/home/transaction/transaction_dialog.dart';
 import 'package:gnucash_mobile/ui/home/transactions.dart';
 import 'package:gnucash_mobile/ui/settings/settings.dart';
 import 'package:logger/logger.dart';
@@ -98,7 +99,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               icon: const Icon(Icons.add),
               heroTag: "create_transaction",
               onPressed: () async {
-                Transaction? transaction = await showCreateTransactionDialog(context);
+                Transaction? transaction = await showCreateTransactionDialog(context: context);
                 if (transaction == null) {
                   return;
                 }

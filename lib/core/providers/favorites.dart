@@ -34,7 +34,7 @@ mixin FavoriteAccounts on AutoDisposeNotifier<List<Account>> {
   }
 
   void push(Account account) {
-    state = [account, ...state.skipWhile((e) => e == account)].take(5).toList();
+    state = [account, ...state.where((e) => e != account)].take(5).toList();
   }
   void clear() {
     state = [];
